@@ -33,17 +33,17 @@ function cfg() {
 }
 
 function period(prefix, c) {
-  const day = num('day' + prefix);
-  const night = num('night' + prefix);
-  const holiday = num('holiday' + prefix);
-  const travelDays = num('travel' + prefix);
-  const totalHours = day + night;
+  const totalHours = Math.max(0, num('day' + prefix));
+  const nightInput = Math.max(0, num('night' + prefix));
+  const night = Math.min(nightInput, totalHours);
+  const holiday = Math.max(0, num('holiday' + prefix));
+  const travelDays = Math.max(0, num('travel' + prefix));
 
   const vakhEl = $('vakh' + prefix);
   const autoVakh = Math.max(0, Math.ceil(totalHours / 12) + travelDays);
   const vakhDays = !vakhEl || vakhEl.value.trim() === ''
     ? autoVakh
-    : (parseFloat(vakhEl.value) || 0);
+    : Math.max(0, parseFloat(vakhEl.value) || 0);
 
   const rate = c.norm > 0 ? c.salary / c.norm : 0;
   const base = round2(rate * totalHours);
@@ -59,7 +59,7 @@ function period(prefix, c) {
   const gross = round2(base + nightPay + holidayPay + rk + sn + travel + vakh);
 
   return {
-    day, night, totalHours, holiday, travelDays, vakhDays,
+    totalHours, night, nightInput, holiday, travelDays, vakhDays,
     rate, base, nightPay, holidayPay, rk, sn, travel, vakh, gross
   };
 }
@@ -126,16 +126,21 @@ function calculate() {
 
   const last = daysInMonth();
   if ($('summary')) {
+    let warn = '';
+    if (p1.nightInput > p1.totalHours || p2.nightInput > p2.totalHours) {
+      warn = '<br><b>Проверьте:</b> ночных часов не может быть больше общих рабочих часов.';
+    }
     $('summary').innerHTML =
-      `1–15: <b>${round2(p1.day)} дневных + ${round2(p1.night)} ночных = ${round2(p1.totalHours)} ч</b>. ` +
-      `16–${last}: <b>${round2(p2.day)} дневных + ${round2(p2.night)} ночных = ${round2(p2.totalHours)} ч</b>. ` +
-      `Ставка: <b>${money(p1.rate)}/ч</b>.`;
+      `1–15: <b>${round2(p1.totalHours)} рабочих ч, из них ${round2(p1.night)} ночных</b>. ` +
+      `16–${last}: <b>${round2(p2.totalHours)} рабочих ч, из них ${round2(p2.night)} ночных</b>. ` +
+      `Ставка: <b>${money(p1.rate)}/ч</b>.${warn}`;
   }
 
   const rows = [
     ['Рабочие часы', p1.totalHours, p2.totalHours, false],
+    ['Из них ночные', p1.night, p2.night, false],
     ['Оплата по окладу', p1.base, p2.base, true],
-    ['Ночные', p1.nightPay, p2.nightPay, true],
+    ['Доплата за ночные', p1.nightPay, p2.nightPay, true],
     ['Праздничные', p1.holidayPay, p2.holidayPay, true],
     ['РК', p1.rk, p2.rk, true],
     ['СН', p1.sn, p2.sn, true],
@@ -210,7 +215,6 @@ function initApp() {
   loadState();
   toggleVacation(true);
 
-  // Делегирование работает и когда приложение вставлено загрузчиком GitHub Pages.
   document.addEventListener('input', e => {
     if (e.target && e.target.matches('input,select')) calculate();
   });
@@ -224,7 +228,6 @@ function initApp() {
   calculate();
 }
 
-// На GitHub Pages интерфейс подставляется после того, как DOMContentLoaded уже мог пройти.
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initApp, {once:true});
 } else {
