@@ -32,10 +32,30 @@ function cfg() {
   };
 }
 
+// Перевод фактической длительности ночных смен в часы,
+// на которые начисляется ночная доплата по вашим расчеткам:
+// 12н -> 8 ч, 8н -> 6 ч, 4н -> 2 ч.
+// Если введена сумма нескольких ночных смен, сначала предполагаем
+// максимально возможное число 12-часовых смен, затем 8 или 4 часа.
+function nightPremiumHoursFromShiftHours(value) {
+  const h = Math.max(0, Number(value) || 0);
+  const whole = Math.round(h);
+  if (Math.abs(h - whole) < 0.0001 && whole % 4 === 0) {
+    const twelves = Math.floor(whole / 12);
+    const rem = whole % 12;
+    let premium = twelves * 8;
+    if (rem === 8) premium += 6;
+    else if (rem === 4) premium += 2;
+    return premium;
+  }
+  return round2(h * 2 / 3);
+}
+
 function period(prefix, c) {
-  const totalHours = Math.max(0, num('day' + prefix));
-  const nightInput = Math.max(0, num('night' + prefix));
-  const night = Math.min(nightInput, totalHours);
+  const dayHours = Math.max(0, num('day' + prefix));
+  const nightShiftHours = Math.max(0, num('night' + prefix));
+  const totalHours = round2(dayHours + nightShiftHours);
+  const nightPremiumHours = nightPremiumHoursFromShiftHours(nightShiftHours);
   const holiday = Math.max(0, num('holiday' + prefix));
   const travelDays = Math.max(0, num('travel' + prefix));
 
@@ -47,7 +67,7 @@ function period(prefix, c) {
 
   const rate = c.norm > 0 ? c.salary / c.norm : 0;
   const base = round2(rate * totalHours);
-  const nightPay = round2(rate * night * c.nightPct);
+  const nightPay = round2(rate * nightPremiumHours * c.nightPct);
   const holidayPay = round2(rate * holiday);
   const coeffBase = round2(base + nightPay + holidayPay);
   const rk = round2(coeffBase * c.rk);
@@ -59,7 +79,8 @@ function period(prefix, c) {
   const gross = round2(base + nightPay + holidayPay + rk + sn + travel + vakh);
 
   return {
-    totalHours, night, nightInput, holiday, travelDays, vakhDays,
+    dayHours, nightShiftHours, totalHours, nightPremiumHours,
+    holiday, travelDays, vakhDays,
     rate, base, nightPay, holidayPay, rk, sn, travel, vakh, gross
   };
 }
@@ -82,6 +103,18 @@ function updateLabels() {
   if ($('secondLabel')) $('secondLabel').textContent = `С 16 по ${last} число`;
   if ($('finalCaption')) $('finalCaption').textContent = `за 16–${last} + премия`;
   if ($('thSecond')) $('thSecond').textContent = `16–${last}`;
+
+  const labels1 = document.querySelectorAll('.period.first .bigField label');
+  const labels2 = document.querySelectorAll('.period.second .bigField label');
+  if (labels1[0]) labels1[0].textContent = 'Дневные часы';
+  if (labels1[1]) labels1[1].textContent = 'Ночные часы';
+  if (labels2[0]) labels2[0].textContent = 'Дневные часы';
+  if (labels2[1]) labels2[1].textContent = 'Ночные часы';
+
+  const note1 = document.querySelector('.period.first .note');
+  if (note1) {
+    note1.innerHTML = 'Вводите фактическую длительность смен. Например: <b>60 дневных + 28 ночных = 88 рабочих часов</b>. Ночную доплату программа переведет сама: 12н → 8 ч, 8н → 6 ч, 4н → 2 ч.';
+  }
 }
 
 function calculate() {
@@ -126,19 +159,19 @@ function calculate() {
 
   const last = daysInMonth();
   if ($('summary')) {
-    let warn = '';
-    if (p1.nightInput > p1.totalHours || p2.nightInput > p2.totalHours) {
-      warn = '<br><b>Проверьте:</b> ночных часов не может быть больше общих рабочих часов.';
-    }
     $('summary').innerHTML =
-      `1–15: <b>${round2(p1.totalHours)} рабочих ч, из них ${round2(p1.night)} ночных</b>. ` +
-      `16–${last}: <b>${round2(p2.totalHours)} рабочих ч, из них ${round2(p2.night)} ночных</b>. ` +
-      `Ставка: <b>${money(p1.rate)}/ч</b>.${warn}`;
+      `1–15: <b>${round2(p1.dayHours)} дневных + ${round2(p1.nightShiftHours)} ночных = ${round2(p1.totalHours)} ч</b>; ` +
+      `для ночной доплаты: <b>${round2(p1.nightPremiumHours)} ч</b>. ` +
+      `16–${last}: <b>${round2(p2.dayHours)} дневных + ${round2(p2.nightShiftHours)} ночных = ${round2(p2.totalHours)} ч</b>; ` +
+      `для ночной доплаты: <b>${round2(p2.nightPremiumHours)} ч</b>. ` +
+      `Ставка: <b>${money(p1.rate)}/ч</b>.`;
   }
 
   const rows = [
-    ['Рабочие часы', p1.totalHours, p2.totalHours, false],
-    ['Из них ночные', p1.night, p2.night, false],
+    ['Дневные часы', p1.dayHours, p2.dayHours, false],
+    ['Ночные часы (длительность смен)', p1.nightShiftHours, p2.nightShiftHours, false],
+    ['Всего рабочих часов', p1.totalHours, p2.totalHours, false],
+    ['Ночные часы для доплаты', p1.nightPremiumHours, p2.nightPremiumHours, false],
     ['Оплата по окладу', p1.base, p2.base, true],
     ['Доплата за ночные', p1.nightPay, p2.nightPay, true],
     ['Праздничные', p1.holidayPay, p2.holidayPay, true],
@@ -214,6 +247,7 @@ function initApp() {
 
   loadState();
   toggleVacation(true);
+  updateLabels();
 
   document.addEventListener('input', e => {
     if (e.target && e.target.matches('input,select')) calculate();
