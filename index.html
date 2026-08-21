@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Вахта — зарплата</title>
+<meta name="theme-color" content="#246bfd">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Вахта ЗП">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <h1>Калькулятор вахтовой зарплаты</h1>
+  <p class="sub">Версия 3. Аванс 29-го считается только за 1–15 число, зарплата 14-го — за 16-е–конец месяца плюс месячная премия и итоговые начисления.</p>
+
+  <div class="card">
+    <h2>1. Основные данные</h2>
+    <div class="grid3">
+      <div>
+        <label>Месяц</label>
+        <select id="month">
+          <option value="1">Январь</option><option value="2">Февраль</option><option value="3">Март</option>
+          <option value="4">Апрель</option><option value="5">Май</option><option value="6">Июнь</option>
+          <option value="7">Июль</option><option value="8">Август</option><option value="9">Сентябрь</option>
+          <option value="10">Октябрь</option><option value="11">Ноябрь</option><option value="12">Декабрь</option>
+        </select>
+      </div>
+      <div>
+        <label>Год</label>
+        <input id="year" type="number" value="2027" min="2024" max="2100">
+      </div>
+      <div>
+        <label>Оклад, ₽</label>
+        <input id="salary" type="number" value="49000" min="0" step="0.01">
+      </div>
+    </div>
+  </div>
+
+
+  <div class="card">
+    <h2>2. Голосовой ввод</h2>
+    <p class="small">Нажмите кнопку и продиктуйте данные обычной речью. Приложение попробует само заполнить месяц, год, оклад и график.</p>
+
+    <div class="row">
+      <button class="primary" id="voiceBtn">🎙 Наговорить данные</button>
+      <button class="secondary" id="voiceStopBtn" disabled>■ Остановить</button>
+      <button class="ghost" id="voiceParseBtn">Разобрать текст</button>
+    </div>
+
+    <div style="margin-top:12px">
+      <label>Что распознано</label>
+      <textarea id="voiceText" placeholder="Например: Январь 2027, оклад 51000. С 1 по 6 выходные. 7 приезд. 8 дневная 12 часов. С 9 по 14 ночная 12 часов. 15 пересмена 4 ночных. С 16 по 22 дневная 12. 23 отъезд. Остальные выходные."></textarea>
+    </div>
+
+    <div class="hint">
+      Можно говорить примерно так:<br>
+      <code>Январь 2027, оклад 51000</code><br>
+      <code>с 1 по 6 выходные</code><br>
+      <code>7 приезд</code><br>
+      <code>с 8 по 12 дневная 12 часов</code><br>
+      <code>с 13 по 18 ночная 12 часов</code><br>
+      <code>19 пересмена 4 ночных</code><br>
+      <code>20 отъезд</code><br><br>
+      Понимает также: <code>отпуск</code>, <code>праздник</code>, <code>8 ночных</code>, <code>4 ночных</code>, <code>остальные выходные</code>.
+    </div>
+    <div id="voiceStatus"></div>
+  </div>
+
+  <div class="card">
+    <h2>3. График</h2>
+    <div class="tabs">
+      <button class="tab active" id="tabDays">По дням</button>
+      <button class="tab" id="tabHalf">Коротко по половинам</button>
+    </div>
+
+    <div id="modeDays">
+      <label>График по порядку дней месяца</label>
+      <textarea id="schedule" placeholder="Например: В В В В В В Пр 12п 12 12 4н 12н 12н 12н 12н 12н 12н ..."></textarea>
+      <div class="hint">
+        Один символ/код = один календарный день. Разделяйте пробелами.<br>
+        <span class="badge">12</span> дневная 12 ч
+        <span class="badge">12н</span> ночная 12 ч
+        <span class="badge">8н</span> ночная 8 ч
+        <span class="badge">4н</span> ночная 4 ч
+        <span class="badge">12п</span> 12 ч в праздник
+        <span class="badge">12нп</span> ночная в праздник
+        <span class="badge">В</span> выходной
+        <span class="badge">О</span> отпуск
+        <span class="badge">Пр</span> приезд/дорога
+        <span class="badge">От</span> отъезд/дорога
+        <br>Обычное число тоже понимается как дневные часы: <code>9</code>, <code>8</code>, <code>6</code>.
+      </div>
+    </div>
+
+    <div id="modeHalf" class="hidden">
+      <div class="grid">
+        <div>
+          <label>1–15 число</label>
+          <textarea id="half1" placeholder="12x3 12нx4 4нx1 Прx1 Вx7"></textarea>
+        </div>
+        <div>
+          <label>16–конец месяца</label>
+          <textarea id="half2" placeholder="12x7 8нx1 Отx1 Вx6"></textarea>
+        </div>
+      </div>
+      <div class="hint">
+        Можно писать <code>12x5</code>, <code>12н×8</code>, <code>4нx1</code>. Для точного разделения 29/14 лучше режим «По дням».
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <button class="primary" id="calcBtn">Рассчитать</button>
+      <button class="secondary" id="julyPreset">Проверка: июль 2026</button>
+      <button class="secondary" id="janPreset">Проверка: январь 2026</button>
+      <button class="ghost" id="clearBtn">Очистить график</button>
+    </div>
+    <div id="parseMsg"></div>
+  </div>
+
+  <div class="card">
+    <h2>4. Результат</h2>
+    <div class="result-grid">
+      <div class="result main">
+        <div class="k">29-го — за 1–15 число</div>
+        <div class="v" id="advanceOut">—</div>
+      </div>
+      <div class="result good">
+        <div class="k">14-го — за 16-е–конец + премия</div>
+        <div class="v" id="finalOut">—</div>
+      </div>
+      <div class="result">
+        <div class="k">Всего за месяц на руки</div>
+        <div class="v" id="netOut">—</div>
+      </div>
+    </div>
+
+    <div id="summary" class="hint" style="margin-top:14px">Введите график и нажмите «Рассчитать».</div>
+    <div id="warnings"></div>
+
+    <details>
+      <summary>Подробный расклад</summary>
+      <div style="overflow:auto;margin-top:10px">
+        <table>
+          <thead><tr><th>Начисление</th><th>Сумма</th></tr></thead>
+          <tbody id="breakdown"></tbody>
+          <tfoot>
+            <tr><td>Всего начислено</td><td id="grossOut">—</td></tr>
+            <tr><td>Профсоюз</td><td id="unionOut">—</td></tr>
+            <tr><td>НДФЛ</td><td id="taxOut">—</td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Разделение выплаты на 29-е и 14-е</summary>
+      <div id="halfSummary" class="hint"></div>
+      <div style="overflow:auto;margin-top:10px">
+        <table>
+          <thead>
+            <tr><th>Показатель</th><th>29-го: 1–15</th><th>14-го: 16–конец</th></tr>
+          </thead>
+          <tbody id="periodBreakdown"></tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <details open>
+      <summary>Настройки расчёта</summary>
+      <p class="small">Обычно их менять не нужно. Они сохраняются в браузере.</p>
+      <div class="grid3" style="margin-top:12px">
+        <div><label>Норма часов для ставки</label><input id="norm" type="number" step="0.01" value="164.33"></div>
+        <div><label>РК, %</label><input id="rkPct" type="number" step="0.01" value="80"></div>
+        <div><label>СН, %</label><input id="snPct" type="number" step="0.01" value="80"></div>
+        <div><label>Ночные, %</label><input id="nightPct" type="number" step="0.01" value="35"></div>
+        <div><label>Ежемесячная премия, %</label><input id="premiumPct" type="number" step="0.01" value="45"></div>
+        <div><label>Вахтовая надбавка, ₽/день</label><input id="vakhDay" type="number" step="0.01" value="287"></div>
+        <div><label>Профсоюз, %</label><input id="unionPct" type="number" step="0.01" value="1"></div>
+        <div><label>НДФЛ, %</label><input id="taxPct" type="number" step="0.01" value="13"></div>
+        <div><label>Налоговый вычет этого месяца, ₽</label><input id="taxDeduction" type="number" step="0.01" value="0"></div>
+        <div><label>Личный вклад, %</label><input id="personalPct" type="number" step="0.01" value="0"></div>
+        <div>
+          <label>Оплата дня в пути, ₽</label>
+          <input id="travelDay" type="number" step="0.01" value="0">
+          <div class="small">0 = автоматически 8 × часовая ставка</div>
+        </div>
+        <div><label>Доп. начисления к выплате 14-го, ₽</label><input id="extraGross" type="number" step="0.01" value="0"></div>
+      </div>
+
+      <div class="grid" style="margin-top:12px">
+        <div>
+          <label>Уже выплачено отдельно до зарплаты, ₽</label>
+          <input id="alreadyPaid" type="number" step="0.01" value="0">
+          <div class="small">Если часть начислений уже перечислили отдельно, она вычтется только из выплаты 14-го.</div>
+        </div>
+        <div>
+          <label>Правило периодов</label>
+          <input value="29-го: 1–15 · 14-го: 16–конец" disabled>
+          <div class="small">Период фиксирован и не делится как 50/50.</div>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h3>Как сейчас считает программа</h3>
+    <p class="small">
+      Основная оплата = оклад / норма часов × фактические часы. Ночные = часовая ставка × ночные часы × 35%.
+      Праздничные часы добавляются ещё по одной часовой ставке. РК и СН считаются по каждому периоду отдельно.
+      Выплата 29-го строится только из событий 1–15 числа. Выплата 14-го строится только из событий 16-го–конца месяца,
+      а затем к ней добавляется ежемесячная премия за весь закрытый месяц, РК/СН на премию и дополнительные начисления.
+      Это уже не схема «весь месяц минус аванс».
+    </p>
+    <p class="small">
+      Ночные часы: 12н → 8 ночных часов, 8н → 6, 4н → 2. Налоговый вычет сначала применяется к выплате 29-го,
+      а неиспользованный остаток — к выплате 14-го. Вахтовые и дорога относятся к той половине месяца, на дату которой они стоят в графике.
+    </p>
+  </div>
+</div>
+
+<script src="core.js" defer></script>
+<script src="voice.js" defer></script>
+</body>
+</html>
