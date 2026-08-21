@@ -16,7 +16,7 @@
 <div class="wrap">
   <div class="hero">
     <h1>Вахта — зарплата</h1>
-    <p>Простой расчёт по часам. Заполняете две половины месяца — суммы пересчитываются автоматически.</p>
+    <p>Введите общие рабочие часы и отдельно — сколько из них ночных.</p>
   </div>
 
   <section class="card">
@@ -26,17 +26,17 @@
         <option value="1">Январь</option><option value="2">Февраль</option><option value="3">Март</option><option value="4">Апрель</option><option value="5">Май</option><option value="6">Июнь</option><option value="7">Июль</option><option value="8">Август</option><option value="9">Сентябрь</option><option value="10">Октябрь</option><option value="11">Ноябрь</option><option value="12">Декабрь</option>
       </select></div>
       <div><label>Год</label><input id="year" type="number" value="2027" min="2024" max="2100"></div>
-      <div><label>Оклад, ₽</label><input id="salary" type="number" value="49000" min="0" step="100"></div>
+      <div><label>Оклад, ₽</label><input id="salary" type="number" value="49000" min="0" step="1"></div>
     </div>
   </section>
 
   <section class="card period first">
     <div class="periodHead"><div><div class="eyebrow">АВАНС 29-ГО</div><h2>2. С 1 по 15 число</h2></div><div class="periodMoney" id="advanceTop">0 ₽</div></div>
     <div class="hoursGrid">
-      <div class="bigField"><label>Дневные часы</label><input id="day1" inputmode="decimal" type="number" min="0" step="1" value="0"><span>ч</span></div>
-      <div class="bigField"><label>Ночные часы</label><input id="night1" inputmode="decimal" type="number" min="0" step="1" value="0"><span>ч</span></div>
+      <div class="bigField"><label>Всего рабочих часов</label><input id="day1" inputmode="decimal" type="number" min="0" step="1" value="0"><span>ч</span></div>
+      <div class="bigField"><label>Из них ночных</label><input id="night1" inputmode="decimal" type="number" min="0" step="1" value="0"><span>ч</span></div>
     </div>
-    <div class="note">Одна 12-часовая ночная смена обычно = <b>4 дневных + 8 ночных часов</b>.</div>
+    <div class="note">Ночные часы <b>уже входят</b> в общие рабочие часы. Например: отработано 88 ч, из них ночных 18 ч → вводите <b>88</b> и <b>18</b>.</div>
     <details>
       <summary>Дополнительно для 1–15</summary>
       <div class="grid3 inside">
@@ -51,10 +51,10 @@
   <section class="card period second">
     <div class="periodHead"><div><div class="eyebrow greenText">ЗАРПЛАТА 14-ГО</div><h2>3. <span id="secondLabel">С 16 по 31 число</span></h2></div><div class="periodMoney greenText" id="salaryTop">0 ₽</div></div>
     <div class="hoursGrid">
-      <div class="bigField"><label>Дневные часы</label><input id="day2" inputmode="decimal" type="number" min="0" step="1" value="0"><span>ч</span></div>
-      <div class="bigField"><label>Ночные часы</label><input id="night2" inputmode="decimal" type="number" min="0" step="1" value="0"><span>ч</span></div>
+      <div class="bigField"><label>Всего рабочих часов</label><input id="day2" inputmode="decimal" type="number" min="0" step="1" value="0"><span>ч</span></div>
+      <div class="bigField"><label>Из них ночных</label><input id="night2" inputmode="decimal" type="number" min="0" step="1" value="0"><span>ч</span></div>
     </div>
-    <div class="note">К выплате 14-го здесь же добавляется <b>месячная премия 45%</b> и РК/СН на неё.</div>
+    <div class="note">К выплате 14-го добавляется <b>месячная премия 45%</b> и РК/СН на неё.</div>
     <details>
       <summary>Дополнительно за вторую половину</summary>
       <div class="grid3 inside">
@@ -72,7 +72,7 @@
         <div><label>Дней отпуска</label><input id="vacDays" type="number" min="0" step="1" value="0"></div>
         <div><label>Отпускные на руки, ₽</label><input id="vacNet" type="number" min="0" step="100" value="0"></div>
       </div>
-      <div class="note">Пока отпускные вводятся отдельной суммой на руки. Следующим этапом можно восстановить их автоматический расчёт по среднему заработку.</div>
+      <div class="note">Пока отпускные вводятся отдельной суммой на руки. Автоматический расчёт отпускных сделаем отдельной логикой.</div>
     </div>
   </section>
 
@@ -104,7 +104,7 @@
         <div><label>Профсоюз, %</label><input id="unionPct" type="number" step="0.1" value="1"></div>
         <div><label>НДФЛ, %</label><input id="taxPct" type="number" step="0.1" value="13"></div>
         <div><label>Налоговый вычет, ₽</label><input id="taxDeduction" type="number" step="100" value="0"></div>
-        <div><label>Оплата дня в пути, ₽</label><input id="travelDay" type="number" step="1" value="0"><small>0 = 8 × часовая ставка</small></div>
+        <div><label>Оплата дня в пути, ₽</label><input id="travelDay" type="number" step="1" value="0"><small>Для точности можно указать из расчётки</small></div>
         <div><label>Доп. начисления 14-го, ₽</label><input id="extraGross" type="number" step="100" value="0"></div>
       </div>
       <button id="resetBtn" class="softBtn" type="button">Сбросить часы месяца</button>
