@@ -1,5 +1,5 @@
-const CACHE_NAME = 'voice-translator-v7';
-const APP_SHELL = ['./', './index.html', './styles.css', './app.js', './voice-gender.js', './manifest.webmanifest', './icon.svg'];
+const CACHE_NAME = 'voice-translator-v8';
+const APP_SHELL = ['./', './index.html', './styles.css', './app.js', './voice-gender.js', './language-ui.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
