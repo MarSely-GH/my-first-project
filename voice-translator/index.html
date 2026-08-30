@@ -9,9 +9,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Переводчик">
   <title>Голосовой переводчик</title>
-  <link rel="manifest" href="manifest.webmanifest?v=6">
+  <link rel="manifest" href="manifest.webmanifest?v=8">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=8">
   <style>
     .voice-choice-box{margin-top:18px;padding:16px;border:2px solid #2457d6;border-radius:16px;background:#f5f8ff}
     .voice-choice-box label{display:block;font-weight:800;font-size:1.05rem;margin-bottom:8px}
@@ -31,7 +31,7 @@
         <p class="eyebrow">РУССКИЙ → МИР</p>
         <h1>Голосовой переводчик</h1>
         <p class="subtitle">Скажите фразу по-русски, получите перевод и включите озвучку собеседнику.</p>
-        <div class="version-badge">Версия 6 · исправлен выбор голосов без зависаний</div>
+        <div class="version-badge">Версия 8 · Германия и США основные, остальные под стрелкой</div>
       </div>
       <button id="installBtn" class="ghost install" type="button" hidden>Установить ярлык</button>
     </header>
@@ -56,9 +56,9 @@
     <section class="panel">
       <div class="panel-title-row">
         <div><span class="step">2</span><h2>Выберите страны и языки</h2></div>
-        <button id="defaultsBtn" class="ghost small-btn" type="button">Немецкий + English</button>
+        <button id="defaultsBtn" class="ghost small-btn" type="button">🇩🇪 Германия + 🇺🇸 США</button>
       </div>
-      <p class="hint">Можно выбрать несколько вариантов сразу. Для вариантов одного языка текст перевода может совпадать, но голос и акцент зависят от голосов, установленных на телефоне или компьютере.</p>
+      <p class="hint">Германия и США всегда находятся сверху. Остальные языки открываются по стрелке «Другие языки» и при необходимости добавляются к переводу.</p>
       <div id="languageGrid" class="language-grid"></div>
 
       <div class="voice-choice-box">
@@ -113,7 +113,8 @@
     </article>
   </template>
 
-  <script src="app.js?v=6" defer></script>
-  <script src="voice-gender.js?v=6" defer></script>
+  <script src="app.js?v=8" defer></script>
+  <script src="voice-gender.js?v=8" defer></script>
+  <script src="language-ui.js?v=8" defer></script>
 </body>
 </html>
