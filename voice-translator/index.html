@@ -9,9 +9,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Переводчик">
   <title>Голосовой переводчик</title>
-  <link rel="manifest" href="manifest.webmanifest?v=4">
+  <link rel="manifest" href="manifest.webmanifest?v=5">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
   <style>
     .voice-choice-box{margin-top:18px;padding:16px;border:2px solid #2457d6;border-radius:16px;background:#f5f8ff}
     .voice-choice-box label{display:block;font-weight:800;font-size:1.05rem;margin-bottom:8px}
@@ -21,6 +21,7 @@
     .card-voice-box{margin-top:14px;padding:12px;border:1px solid #cbd7f7;border-radius:12px;background:#f8faff}
     .card-voice-box label{display:block;font-weight:750;margin-bottom:7px}
     .card-voice-box small{display:block;margin-top:7px;opacity:.78;line-height:1.35}
+    .listen-note{margin-top:10px;padding:10px 12px;border-radius:12px;background:#eef6ff;font-weight:700;line-height:1.4}
   </style>
 </head>
 <body>
@@ -30,7 +31,7 @@
         <p class="eyebrow">РУССКИЙ → МИР</p>
         <h1>Голосовой переводчик</h1>
         <p class="subtitle">Скажите фразу по-русски, получите перевод и включите озвучку собеседнику.</p>
-        <div class="version-badge">Версия 4 · точный выбор голоса устройства</div>
+        <div class="version-badge">Версия 5 · непрерывная диктовка до кнопки «Стоп»</div>
       </div>
       <button id="installBtn" class="ghost install" type="button" hidden>Установить ярлык</button>
     </header>
@@ -47,8 +48,9 @@
         <button id="translateBtn" class="secondary" type="button">Перевести</button>
         <button id="clearBtn" class="ghost" type="button">Очистить</button>
       </div>
-      <label class="check-row compact"><input id="autoTranslate" type="checkbox" checked><span>Переводить автоматически после голосового ввода</span></label>
-      <p id="speechHint" class="hint">Для микрофона браузер попросит разрешение. Если голосовой ввод недоступен, текст можно вводить вручную.</p>
+      <div class="listen-note">🎤 После нажатия «Говорить» можно делать паузы. Переводчик продолжит слушать и накапливать текст, пока вы сами не нажмёте «Стоп».</div>
+      <label class="check-row compact"><input id="autoTranslate" type="checkbox" checked><span>Перевести автоматически после нажатия «Стоп»</span></label>
+      <p id="speechHint" class="hint">Если браузер сам завершит распознавание из-за тишины, приложение автоматически запустит микрофон снова и продолжит эту же диктовку.</p>
     </section>
 
     <section class="panel">
@@ -90,7 +92,7 @@
 
     <section class="panel info-panel">
       <details><summary>Как пользоваться и что важно знать</summary><div class="details-body">
-        <p><b>1.</b> Произнесите или напишите фразу. <b>2.</b> Выберите страны. <b>3.</b> После перевода выберите точный голос на карточке, если нужен другой. <b>4.</b> Нажмите «Озвучить».</p>
+        <p><b>1.</b> Нажмите «Говорить» и диктуйте сколько нужно — паузы разрешены. <b>2.</b> Нажмите «Стоп», когда закончили. <b>3.</b> Получите перевод. <b>4.</b> Выберите точный голос на карточке и нажмите «Озвучить».</p>
         <p>Если в списке немецкого или английского языка нет ни одного мужского голоса, значит браузер на этом устройстве его не предоставляет. Тогда для настоящего мужского голоса нужен отдельный онлайн-движок озвучки.</p>
         <p>Для распознавания речи и перевода нужен интернет. Перевод выполняется через внешний онлайн-сервис. Не вводите пароли, банковские данные и другую секретную информацию.</p>
       </div></details>
@@ -111,7 +113,7 @@
     </article>
   </template>
 
-  <script src="app.js?v=4" defer></script>
-  <script src="voice-gender.js?v=4" defer></script>
+  <script src="app.js?v=5" defer></script>
+  <script src="voice-gender.js?v=5" defer></script>
 </body>
 </html>
