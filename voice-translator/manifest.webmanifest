@@ -1,0 +1,19 @@
+{
+  "name": "Голосовой переводчик",
+  "short_name": "Переводчик",
+  "description": "Голосовой перевод с русского на разные языки с озвучкой.",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eef3ff",
+  "theme_color": "#2457d6",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
