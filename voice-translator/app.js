@@ -37,7 +37,12 @@ const els = {
 };
 
 let recognition = null;
-let isListening = false;
+let recognitionRunning = false;
+let keepListening = false;
+let stopRequested = false;
+let restartTimer = null;
+let finalTranscript = '';
+let interimTranscript = '';
 let translationRun = 0;
 let voices = [];
 let deferredInstallPrompt = null;
@@ -81,7 +86,22 @@ function showToast(message) {
   toast.className = 'toast';
   toast.textContent = message;
   document.body.append(toast);
-  window.setTimeout(() => toast.remove(), 2200);
+  window.setTimeout(() => toast.remove(), 2400);
+}
+
+function normalizeSpaces(text) {
+  return String(text || '').replace(/\s+/g, ' ').trim();
+}
+
+function appendFinal(text) {
+  const clean = normalizeSpaces(text);
+  if (!clean) return;
+  finalTranscript = normalizeSpaces(`${finalTranscript} ${clean}`);
+}
+
+function updateTranscriptBox() {
+  els.sourceText.value = normalizeSpaces(`${finalTranscript} ${interimTranscript}`);
+  els.sourceText.scrollTop = els.sourceText.scrollHeight;
 }
 
 function splitForFallback(text, maxLength = 450) {
@@ -214,28 +234,77 @@ async function runTranslation() {
   els.results.className = 'results';
   els.results.innerHTML = '';
 
-  const cache = new Map();
-  const getTranslation = (target) => {
-    if (!cache.has(target)) cache.set(target, translateText(text, target));
-    return cache.get(target);
-  };
+  try {
+    const cache = new Map();
+    const getTranslation = (target) => {
+      if (!cache.has(target)) cache.set(target, translateText(text, target));
+      return cache.get(target);
+    };
 
-  const cards = await Promise.all(selected.map(async (lang) => {
-    try {
-      const translated = await getTranslation(lang.target);
-      return { lang, translated };
-    } catch (error) {
-      return { lang, error: error?.message || 'Ошибка сети' };
+    const cards = await Promise.all(selected.map(async (lang) => {
+      try {
+        const translated = await getTranslation(lang.target);
+        return { lang, translated };
+      } catch (error) {
+        return { lang, error: error?.message || 'Ошибка сети' };
+      }
+    }));
+
+    if (runId !== translationRun) return;
+    cards.forEach((item) => {
+      if (item.error) els.results.append(makeErrorCard(item.lang, item.error));
+      else els.results.append(makeResultCard(item.lang, item.translated));
+    });
+  } finally {
+    if (runId === translationRun) {
+      els.translateBtn.disabled = false;
+      if (keepListening) setStatus('Слушаю — паузы можно делать', 'listening');
+      else setStatus('Готов');
     }
-  }));
+  }
+}
 
-  if (runId !== translationRun) return;
-  cards.forEach((item) => {
-    if (item.error) els.results.append(makeErrorCard(item.lang, item.error));
-    else els.results.append(makeResultCard(item.lang, item.translated));
-  });
-  els.translateBtn.disabled = false;
-  setStatus('Готов');
+function finalizeListeningSession() {
+  recognitionRunning = false;
+  if (interimTranscript) {
+    appendFinal(interimTranscript);
+    interimTranscript = '';
+    updateTranscriptBox();
+  }
+
+  if (keepListening) {
+    els.micBtn.disabled = true;
+    els.stopBtn.disabled = false;
+    setStatus('Слушаю — паузы можно делать', 'listening');
+    clearTimeout(restartTimer);
+    restartTimer = window.setTimeout(startRecognitionCycle, 280);
+    return;
+  }
+
+  els.micBtn.disabled = false;
+  els.stopBtn.disabled = true;
+  if (!els.status.classList.contains('busy')) setStatus('Готов');
+
+  const shouldTranslate = stopRequested && els.autoTranslate.checked && els.sourceText.value.trim();
+  stopRequested = false;
+  if (shouldTranslate) runTranslation();
+}
+
+function startRecognitionCycle() {
+  if (!recognition || !keepListening || recognitionRunning) return;
+  try {
+    recognition.start();
+  } catch (error) {
+    if (error?.name === 'InvalidStateError') {
+      clearTimeout(restartTimer);
+      restartTimer = window.setTimeout(startRecognitionCycle, 350);
+      return;
+    }
+    console.warn(error);
+    keepListening = false;
+    showToast('Не удалось снова запустить микрофон');
+    finalizeListeningSession();
+  }
 }
 
 function initSpeechRecognition() {
@@ -249,59 +318,78 @@ function initSpeechRecognition() {
   recognition = new SpeechRecognition();
   recognition.lang = 'ru-RU';
   recognition.interimResults = true;
-  recognition.continuous = false;
+  recognition.continuous = true;
   recognition.maxAlternatives = 1;
 
   recognition.onstart = () => {
-    isListening = true;
+    recognitionRunning = true;
     els.micBtn.disabled = true;
     els.stopBtn.disabled = false;
-    setStatus('Слушаю…', 'listening');
+    setStatus('Слушаю — паузы можно делать', 'listening');
   };
 
   recognition.onresult = (event) => {
-    let transcript = '';
-    let isFinal = false;
+    let currentInterim = '';
     for (let i = event.resultIndex; i < event.results.length; i++) {
-      transcript += event.results[i][0].transcript;
-      if (event.results[i].isFinal) isFinal = true;
+      const text = normalizeSpaces(event.results[i][0]?.transcript || '');
+      if (!text) continue;
+      if (event.results[i].isFinal) appendFinal(text);
+      else currentInterim = normalizeSpaces(`${currentInterim} ${text}`);
     }
-    els.sourceText.value = transcript.trim();
-    if (isFinal && els.autoTranslate.checked) runTranslation();
+    interimTranscript = currentInterim;
+    updateTranscriptBox();
   };
 
   recognition.onerror = (event) => {
+    const fatal = ['not-allowed', 'service-not-allowed', 'audio-capture', 'network'].includes(event.error);
     const labels = {
       'not-allowed': 'Нет разрешения на микрофон',
+      'service-not-allowed': 'Браузер запретил распознавание речи',
       'audio-capture': 'Микрофон не найден',
-      'no-speech': 'Речь не распознана',
       'network': 'Ошибка сети при распознавании'
     };
-    showToast(labels[event.error] || `Ошибка микрофона: ${event.error}`);
+
+    if (fatal) {
+      keepListening = false;
+      stopRequested = false;
+      showToast(labels[event.error] || `Ошибка микрофона: ${event.error}`);
+    } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
+      showToast(`Ошибка микрофона: ${event.error}`);
+    }
   };
 
-  recognition.onend = () => {
-    isListening = false;
-    els.micBtn.disabled = false;
-    els.stopBtn.disabled = true;
-    if (!els.status.classList.contains('busy')) setStatus('Готов');
-  };
+  recognition.onend = finalizeListeningSession;
 }
 
 function startListening() {
-  if (!recognition || isListening) return;
+  if (!recognition || keepListening || recognitionRunning) return;
   window.speechSynthesis?.cancel();
+  translationRun++;
+  els.translateBtn.disabled = false;
+  finalTranscript = '';
+  interimTranscript = '';
   els.sourceText.value = '';
-  try {
-    recognition.start();
-  } catch (error) {
-    console.warn(error);
-    showToast('Не удалось запустить микрофон');
-  }
+  keepListening = true;
+  stopRequested = false;
+  setStatus('Запускаю микрофон…', 'listening');
+  startRecognitionCycle();
 }
 
 function stopListening() {
-  if (recognition && isListening) recognition.stop();
+  if (!recognition || (!keepListening && !recognitionRunning)) return;
+  keepListening = false;
+  stopRequested = true;
+  clearTimeout(restartTimer);
+  setStatus('Завершаю диктовку…', 'busy');
+  if (recognitionRunning) {
+    try {
+      recognition.stop();
+    } catch {
+      finalizeListeningSession();
+    }
+  } else {
+    finalizeListeningSession();
+  }
 }
 
 function initVoices() {
@@ -313,7 +401,7 @@ function initVoices() {
 
 function registerPwa() {
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(console.warn));
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=5').catch(console.warn));
   }
 
   window.addEventListener('beforeinstallprompt', (event) => {
@@ -339,9 +427,20 @@ els.stopBtn.addEventListener('click', stopListening);
 els.translateBtn.addEventListener('click', runTranslation);
 els.clearBtn.addEventListener('click', () => {
   translationRun++;
+  keepListening = false;
+  stopRequested = false;
+  clearTimeout(restartTimer);
+  if (recognitionRunning) {
+    try { recognition.abort(); } catch {}
+  }
+  finalTranscript = '';
+  interimTranscript = '';
   els.sourceText.value = '';
+  els.translateBtn.disabled = false;
+  els.micBtn.disabled = false;
+  els.stopBtn.disabled = true;
   els.results.className = 'results empty-state';
-  els.results.innerHTML = '<div class="empty-icon">🌍</div><p>Здесь появятся переводы. На каждой карточке будет кнопка ▶ «Озвучить».</p>';
+  els.results.innerHTML = '<div class="empty-icon">🌍</div><p>Здесь появятся переводы. На каждой карточке будет кнопка ▶ «Озвучить» и список доступных голосов.</p>';
   setStatus('Готов');
 });
 els.stopSpeechBtn.addEventListener('click', () => window.speechSynthesis?.cancel());
