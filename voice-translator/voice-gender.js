@@ -254,3 +254,131 @@
   schedulePopulate(250);
   window.setTimeout(() => schedulePopulate(0), 1200);
 })();
+
+(() => {
+  const sourcePanel = document.querySelector('.source-panel');
+  const sourceText = document.querySelector('#sourceText');
+  if (!sourcePanel || !sourceText || typeof appendFinal !== 'function') return;
+
+  const badge = document.querySelector('.version-badge');
+  if (badge) badge.textContent = 'Версия 7 · умная пунктуация по паузам и вопросам';
+
+  const control = document.createElement('label');
+  control.className = 'check-row compact';
+  control.style.marginTop = '10px';
+  control.innerHTML = '<input id="smartPunctuation" type="checkbox" checked><span>✍️ Умная пунктуация: точки, вопросы и запятые по паузам</span>';
+
+  const explanation = document.createElement('p');
+  explanation.className = 'hint';
+  explanation.style.marginTop = '6px';
+  explanation.textContent = 'Пауза завершает фразу. Вопросительные слова вроде «где», «как», «сколько», «почему», а также конструкции «можно ли», «есть ли» получают знак вопроса.';
+
+  const autoTranslateRow = sourcePanel.querySelector('#autoTranslate')?.closest('label');
+  if (autoTranslateRow) {
+    autoTranslateRow.before(control, explanation);
+  } else {
+    sourcePanel.append(control, explanation);
+  }
+
+  const smartToggle = control.querySelector('#smartPunctuation');
+  try {
+    const saved = localStorage.getItem('translatorSmartPunctuation');
+    if (saved === 'off') smartToggle.checked = false;
+  } catch {}
+
+  smartToggle.addEventListener('change', () => {
+    try {
+      localStorage.setItem('translatorSmartPunctuation', smartToggle.checked ? 'on' : 'off');
+    } catch {}
+  });
+
+  const oldAppendFinal = appendFinal;
+
+  function cleanSpaces(text) {
+    return String(text || '')
+      .replace(/\s+([,.!?;:])/g, '$1')
+      .replace(/([,.!?;:])(?=\S)/g, '$1 ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function capitalize(text) {
+    const value = String(text || '').trim();
+    if (!value) return '';
+    return value.charAt(0).toLocaleUpperCase('ru-RU') + value.slice(1);
+  }
+
+  function polishCourtesy(text) {
+    let value = cleanSpaces(text);
+    value = value.replace(/\bподскажите пожалуйста\b/gi, 'подскажите, пожалуйста,');
+    value = value.replace(/\bскажите пожалуйста\b/gi, 'скажите, пожалуйста,');
+    value = value.replace(/\bбудьте добры\b/gi, 'будьте добры,');
+    value = value.replace(/\bпожалуйста\s*,?\s*(?=(где|как|когда|куда|откуда|сколько|почему|зачем|какой|какая|какие|какое|можно|есть|будет)\b)/gi, 'пожалуйста, ');
+    return cleanSpaces(value);
+  }
+
+  function isQuestion(text) {
+    const value = cleanSpaces(text).toLowerCase();
+    if (!value) return false;
+
+    const questionStart = /^(?:ну\s+|а\s+|и\s+)?(?:кто|что|где|куда|откуда|когда|почему|зачем|как|сколько|какой|какая|какое|какие|который|которая|которое|которые|чей|чья|чьё|чьи)\b/iu;
+    const questionParticle = /\b(?:можно|нужно|надо|есть|будет|бывает|знаете|знаешь|скажите|подскажите|понимаете|понимаешь)\s+ли\b/iu;
+    const politeQuestion = /^(?:скажите|подскажите|объясните|покажите)(?:,?\s+пожалуйста,?)?.*\b(?:где|куда|откуда|когда|почему|зачем|как|сколько|какой|какая|какое|какие|можно|есть|будет)\b/iu;
+    const directQuestion = /^(?:можно|можете|можешь|есть|будет|бывает|нужно|надо)\b/iu;
+
+    return questionStart.test(value) || questionParticle.test(value) || politeQuestion.test(value) || directQuestion.test(value);
+  }
+
+  function splitGreeting(text) {
+    const match = text.match(/^(здравствуйте|добрый день|доброе утро|добрый вечер|привет)\s+(.+)$/iu);
+    if (!match) return [text];
+    return [`${capitalize(match[1])}.`, match[2]];
+  }
+
+  function punctuateOne(text) {
+    let value = polishCourtesy(text);
+    if (!value) return '';
+    if (/[.!?…]$/.test(value)) return capitalize(value);
+    value = capitalize(value);
+    return `${value}${isQuestion(value) ? '?' : '.'}`;
+  }
+
+  function smartPunctuate(text) {
+    let value = cleanSpaces(text);
+    if (!value) return '';
+
+    value = value
+      .replace(/\bзнак вопроса\b/gi, '?')
+      .replace(/\bвопросительный знак\b/gi, '?')
+      .replace(/\bзнак восклицания\b/gi, '!')
+      .replace(/\bвосклицательный знак\b/gi, '!')
+      .replace(/\bточка с запятой\b/gi, ';')
+      .replace(/\bдвоеточие\b/gi, ':')
+      .replace(/\bзапятая\b/gi, ',');
+
+    const pieces = splitGreeting(value);
+    return pieces.map((piece) => /[.!?…]$/.test(piece.trim()) ? capitalize(piece.trim()) : punctuateOne(piece)).filter(Boolean).join(' ');
+  }
+
+  appendFinal = function patchedAppendFinal(text) {
+    if (!smartToggle.checked) {
+      oldAppendFinal(text);
+      return;
+    }
+    const clean = smartPunctuate(text);
+    if (!clean) return;
+    finalTranscript = cleanSpaces(`${finalTranscript} ${clean}`);
+  };
+
+  function punctuateTextareaBeforeManualTranslation() {
+    if (!smartToggle.checked || !sourceText.value.trim()) return;
+    const current = sourceText.value.trim();
+    if (/[.!?…]$/.test(current) && /[.!?]/.test(current)) return;
+    sourceText.value = smartPunctuate(current);
+  }
+
+  document.querySelector('#translateBtn')?.addEventListener('click', punctuateTextareaBeforeManualTranslation, true);
+  sourceText.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') punctuateTextareaBeforeManualTranslation();
+  }, true);
+})();
