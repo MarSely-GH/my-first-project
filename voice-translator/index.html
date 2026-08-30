@@ -68,7 +68,14 @@
           <option value="1">Обычно</option>
           <option value="1.1">Чуть быстрее</option>
         </select>
+        <label for="voiceGender">Голос</label>
+        <select id="voiceGender">
+          <option value="male" selected>Мужской</option>
+          <option value="auto">Авто</option>
+          <option value="female">Женский</option>
+        </select>
       </div>
+      <p class="hint">В режиме «Мужской» переводчик сначала ищет мужской голос среди установленных на устройстве. Если отдельного мужского голоса нет, используется ближайший системный голос с более низким тембром.</p>
     </section>
 
     <section class="panel results-panel">
@@ -115,5 +122,6 @@
   </template>
 
   <script src="app.js" defer></script>
+  <script src="voice-gender.js" defer></script>
 </body>
 </html>
