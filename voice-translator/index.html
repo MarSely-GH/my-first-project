@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#2457d6">
+  <meta name="description" content="Голосовой переводчик с русского на немецкий, английский и другие языки с озвучкой.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Переводчик">
+  <title>Голосовой переводчик</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">РУССКИЙ → МИР</p>
+        <h1>Голосовой переводчик</h1>
+        <p class="subtitle">Скажите фразу по-русски, получите перевод и включите озвучку собеседнику.</p>
+      </div>
+      <button id="installBtn" class="ghost install" type="button" hidden>Установить ярлык</button>
+    </header>
+
+    <section class="panel source-panel">
+      <div class="panel-title-row">
+        <div>
+          <span class="step">1</span>
+          <h2>Скажите или напишите по-русски</h2>
+        </div>
+        <span id="status" class="status">Готов</span>
+      </div>
+
+      <textarea id="sourceText" rows="5" placeholder="Например: Добрый день. Подскажите, пожалуйста, где находится ближайшая остановка?"></textarea>
+
+      <div class="actions primary-actions">
+        <button id="micBtn" class="primary" type="button">🎤 Говорить</button>
+        <button id="stopBtn" class="danger" type="button" disabled>■ Стоп</button>
+        <button id="translateBtn" class="secondary" type="button">Перевести</button>
+        <button id="clearBtn" class="ghost" type="button">Очистить</button>
+      </div>
+
+      <label class="check-row compact">
+        <input id="autoTranslate" type="checkbox" checked>
+        <span>Переводить автоматически после голосового ввода</span>
+      </label>
+      <p id="speechHint" class="hint">Для микрофона браузер попросит разрешение. Если голосовой ввод недоступен, текст можно вводить вручную.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title-row">
+        <div>
+          <span class="step">2</span>
+          <h2>Выберите страны и языки</h2>
+        </div>
+        <button id="defaultsBtn" class="ghost small-btn" type="button">Немецкий + English</button>
+      </div>
+      <p class="hint">Можно выбрать несколько вариантов сразу. Для вариантов одной страны/языка текст перевода может совпадать, но голос и акцент будут отличаться, если такой голос установлен в системе.</p>
+      <div id="languageGrid" class="language-grid"></div>
+
+      <div class="voice-settings">
+        <label for="speechRate">Скорость озвучки</label>
+        <select id="speechRate">
+          <option value="0.8">Медленно</option>
+          <option value="0.95" selected>Спокойно</option>
+          <option value="1">Обычно</option>
+          <option value="1.1">Чуть быстрее</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="panel results-panel">
+      <div class="panel-title-row">
+        <div>
+          <span class="step">3</span>
+          <h2>Перевод и озвучка</h2>
+        </div>
+        <button id="stopSpeechBtn" class="ghost small-btn" type="button">Остановить голос</button>
+      </div>
+      <div id="results" class="results empty-state">
+        <div class="empty-icon">🌍</div>
+        <p>Здесь появятся переводы. На каждой карточке будет кнопка ▶ «Озвучить».</p>
+      </div>
+    </section>
+
+    <section class="panel info-panel">
+      <details>
+        <summary>Как пользоваться и что важно знать</summary>
+        <div class="details-body">
+          <p><b>1.</b> Нажмите «Говорить» и произнесите фразу по-русски. <b>2.</b> Выберите нужные страны. <b>3.</b> Нажмите «Озвучить» рядом с переводом.</p>
+          <p>Для распознавания речи и перевода нужен интернет. Распознавание речи зависит от возможностей Яндекс Браузера/Chrome и настроек микрофона.</p>
+          <p>Перевод выполняется через внешний онлайн-сервис. Не вводите в переводчик пароли, банковские данные и другую секретную информацию.</p>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <template id="resultTemplate">
+    <article class="result-card">
+      <div class="result-head">
+        <div>
+          <div class="result-country"></div>
+          <div class="result-lang"></div>
+        </div>
+        <button class="copy-btn ghost small-btn" type="button">Копировать</button>
+      </div>
+      <div class="translated-text"></div>
+      <div class="result-actions">
+        <button class="speak-btn primary" type="button">▶ Озвучить</button>
+      </div>
+      <div class="voice-note hint"></div>
+    </article>
+  </template>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
