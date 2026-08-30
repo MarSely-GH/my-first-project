@@ -1,4 +1,4 @@
-const CACHE_NAME = 'voice-translator-v4';
+const CACHE_NAME = 'voice-translator-v5';
 const APP_SHELL = ['./', './index.html', './styles.css', './app.js', './voice-gender.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
