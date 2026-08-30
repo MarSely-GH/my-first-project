@@ -9,9 +9,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Переводчик">
   <title>Голосовой переводчик</title>
-  <link rel="manifest" href="manifest.webmanifest?v=5">
+  <link rel="manifest" href="manifest.webmanifest?v=6">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=6">
   <style>
     .voice-choice-box{margin-top:18px;padding:16px;border:2px solid #2457d6;border-radius:16px;background:#f5f8ff}
     .voice-choice-box label{display:block;font-weight:800;font-size:1.05rem;margin-bottom:8px}
@@ -31,7 +31,7 @@
         <p class="eyebrow">РУССКИЙ → МИР</p>
         <h1>Голосовой переводчик</h1>
         <p class="subtitle">Скажите фразу по-русски, получите перевод и включите озвучку собеседнику.</p>
-        <div class="version-badge">Версия 5 · непрерывная диктовка до кнопки «Стоп»</div>
+        <div class="version-badge">Версия 6 · исправлен выбор голосов без зависаний</div>
       </div>
       <button id="installBtn" class="ghost install" type="button" hidden>Установить ярлык</button>
     </header>
@@ -68,7 +68,7 @@
           <option value="auto">🔊 Авто — системный</option>
           <option value="female">👩 Женский</option>
         </select>
-        <p class="voice-explain">После перевода на каждой карточке появится ещё один список — «Точный голос на этом устройстве». Он показывает именно те голоса, которые реально отдаёт ваш браузер для Германии, Великобритании, США и других стран.</p>
+        <p class="voice-explain">После перевода на каждой карточке появится список «Точный голос на этом устройстве». Там можно вручную выбрать любой голос, который реально предоставляет ваш браузер для нужного языка.</p>
       </div>
 
       <div class="voice-settings">
@@ -113,7 +113,7 @@
     </article>
   </template>
 
-  <script src="app.js?v=5" defer></script>
-  <script src="voice-gender.js?v=5" defer></script>
+  <script src="app.js?v=6" defer></script>
+  <script src="voice-gender.js?v=6" defer></script>
 </body>
 </html>
