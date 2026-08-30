@@ -70,27 +70,34 @@
     const select = card.querySelector('.card-voice-select');
     const note = card.querySelector('.available-voices-note');
     const locale = card.dataset.locale;
-    if (!select || !locale) return;
+    if (!select || !note || !locale) return;
 
     const list = voicesFor(locale);
     const previous = select.value;
-    select.innerHTML = '';
-
-    const automatic = document.createElement('option');
-    automatic.value = '';
-    automatic.textContent = 'Автовыбор — предпочитать мужской';
-    select.append(automatic);
-
-    list.forEach((voice) => {
-      const option = document.createElement('option');
-      option.value = voice.name;
-      option.textContent = voiceLabel(voice);
-      select.append(option);
-    });
-
     const saved = findSavedVoice(locale, list);
-    if (saved) select.value = saved.name;
-    else if (previous && list.some((voice) => voice.name === previous)) select.value = previous;
+    const desiredValue = saved?.name || previous || '';
+
+    const signature = list.map((voice) => `${voice.name}|${voice.lang}`).join('||');
+    if (select.dataset.voiceSignature !== signature) {
+      select.innerHTML = '';
+
+      const automatic = document.createElement('option');
+      automatic.value = '';
+      automatic.textContent = 'Автовыбор — предпочитать мужской';
+      select.append(automatic);
+
+      list.forEach((voice) => {
+        const option = document.createElement('option');
+        option.value = voice.name;
+        option.textContent = voiceLabel(voice);
+        select.append(option);
+      });
+      select.dataset.voiceSignature = signature;
+    }
+
+    if (desiredValue && list.some((voice) => voice.name === desiredValue)) {
+      select.value = desiredValue;
+    }
 
     const maleCount = list.filter((voice) => classifyVoice(voice) === 'male').length;
     const femaleCount = list.filter((voice) => classifyVoice(voice) === 'female').length;
@@ -104,8 +111,21 @@
     }
   }
 
+  let populating = false;
   function populateAllVoiceSelects() {
-    document.querySelectorAll('.result-card').forEach(populateVoiceSelect);
+    if (populating) return;
+    populating = true;
+    try {
+      document.querySelectorAll('.result-card').forEach(populateVoiceSelect);
+    } finally {
+      populating = false;
+    }
+  }
+
+  let populateTimer = null;
+  function schedulePopulate(delay = 30) {
+    window.clearTimeout(populateTimer);
+    populateTimer = window.setTimeout(populateAllVoiceSelects, delay);
   }
 
   function chooseVoice(locale, mode, card) {
@@ -217,11 +237,20 @@
     try { localStorage.setItem('translatorVoiceGender', genderSelect.value); } catch {}
   });
 
-  const observer = new MutationObserver(() => populateAllVoiceSelects());
   const results = document.querySelector('#results');
-  if (results) observer.observe(results, { childList: true, subtree: true });
+  if (results) {
+    const observer = new MutationObserver((mutations) => {
+      const hasDirectCardChange = mutations.some((mutation) =>
+        [...mutation.addedNodes, ...mutation.removedNodes].some((node) =>
+          node.nodeType === 1 && (node.matches?.('.result-card') || node.querySelector?.('.result-card'))
+        )
+      );
+      if (hasDirectCardChange) schedulePopulate();
+    });
+    observer.observe(results, { childList: true });
+  }
 
-  synth.addEventListener?.('voiceschanged', populateAllVoiceSelects);
-  window.setTimeout(populateAllVoiceSelects, 250);
-  window.setTimeout(populateAllVoiceSelects, 1200);
+  synth.addEventListener?.('voiceschanged', () => schedulePopulate(80));
+  schedulePopulate(250);
+  window.setTimeout(() => schedulePopulate(0), 1200);
 })();
