@@ -9,9 +9,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Переводчик">
   <title>Голосовой переводчик</title>
-  <link rel="manifest" href="manifest.webmanifest?v=10">
+  <link rel="manifest" href="manifest.webmanifest?v=11">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=10">
+  <link rel="stylesheet" href="styles.css?v=11">
   <style>
     .voice-choice-box{margin-top:18px;padding:16px;border:2px solid #2457d6;border-radius:16px;background:#f5f8ff}
     .voice-choice-box label{display:block;font-weight:800;font-size:1.05rem;margin-bottom:8px}
@@ -28,19 +28,20 @@
   <main class="app-shell">
     <header class="hero">
       <div>
-        <p class="eyebrow">РУССКИЙ → МИР</p>
+        <p class="eyebrow">РУССКИЙ ↔ МИР</p>
         <h1>Голосовой переводчик</h1>
-        <p class="subtitle">Скажите фразу по-русски, получите перевод и включите озвучку собеседнику.</p>
-        <div class="version-badge">Версия 10 · добавлен Египет — арабский ar-EG</div>
+        <p class="subtitle">Говорите по-русски иностранцу или дайте собеседнику сказать фразу на его языке и получите перевод на русский.</p>
+        <div class="version-badge">Версия 11 · разговор в обе стороны</div>
       </div>
       <button id="installBtn" class="ghost install" type="button" hidden>Установить ярлык</button>
     </header>
 
     <section class="panel source-panel">
       <div class="panel-title-row">
-        <div><span class="step">1</span><h2>Скажите или напишите по-русски</h2></div>
+        <div><span class="step">1</span><h2>Вы → Собеседнику</h2></div>
         <span id="status" class="status">Готов</span>
       </div>
+      <p class="hint">Скажите или напишите фразу по-русски.</p>
       <textarea id="sourceText" rows="5" placeholder="Например: Добрый день. Подскажите, пожалуйста, где находится ближайшая остановка?"></textarea>
       <div class="actions primary-actions">
         <button id="micBtn" class="primary" type="button">🎤 Говорить</button>
@@ -55,7 +56,7 @@
 
     <section class="panel">
       <div class="panel-title-row">
-        <div><span class="step">2</span><h2>Выберите страны и языки</h2></div>
+        <div><span class="step">2</span><h2>Выберите страны и языки перевода</h2></div>
         <button id="defaultsBtn" class="ghost small-btn" type="button">🇩🇪 Германия + 🇺🇸 США</button>
       </div>
       <p class="hint">Германия и США всегда находятся сверху. Остальные языки открываются по стрелке «Другие языки» и при необходимости добавляются к переводу.</p>
@@ -92,8 +93,8 @@
 
     <section class="panel info-panel">
       <details><summary>Как пользоваться и что важно знать</summary><div class="details-body">
-        <p><b>1.</b> Нажмите «Говорить» и диктуйте сколько нужно — паузы разрешены. <b>2.</b> Нажмите «Стоп», когда закончили. <b>3.</b> Получите перевод. <b>4.</b> Выберите точный голос на карточке и нажмите «Озвучить».</p>
-        <p>Если в списке немецкого или английского языка нет ни одного мужского голоса, значит браузер на этом устройстве его не предоставляет. Тогда для настоящего мужского голоса нужен отдельный онлайн-движок озвучки.</p>
+        <p><b>Вы → иностранцу:</b> нажмите «Говорить», скажите фразу по-русски, нажмите «Стоп» и включите озвучку перевода.</p>
+        <p><b>Иностранец → вам:</b> в блоке «Собеседник → Русский» выберите его язык, дайте ему нажать микрофон и сказать фразу. Перевод на русский появится автоматически.</p>
         <p>Для распознавания речи и перевода нужен интернет. Перевод выполняется через внешний онлайн-сервис. Не вводите пароли, банковские данные и другую секретную информацию.</p>
       </div></details>
     </section>
@@ -113,10 +114,11 @@
     </article>
   </template>
 
-  <script src="app.js?v=10" defer></script>
-  <script src="voice-gender.js?v=10" defer></script>
-  <script src="language-ui.js?v=10" defer></script>
-  <script src="android-speech-fix.js?v=10" defer></script>
-  <script src="egypt-language.js?v=10" defer></script>
+  <script src="app.js?v=11" defer></script>
+  <script src="voice-gender.js?v=11" defer></script>
+  <script src="language-ui.js?v=11" defer></script>
+  <script src="android-speech-fix.js?v=11" defer></script>
+  <script src="egypt-language.js?v=11" defer></script>
+  <script src="reverse-conversation.js?v=11" defer></script>
 </body>
 </html>
