@@ -2,64 +2,88 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#f4f6fa">
-  <meta name="description" content="Минималистичный голосовой переводчик для разговора в поездках.">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#087f83">
+  <meta name="description" content="Двусторонний голосовой переводчик для общения в поездках.">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Переводчик">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Переводчик</title>
-  <link rel="manifest" href="manifest.webmanifest?v=12">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=12">
+  <link rel="manifest" href="manifest.webmanifest?v=13">
+  <link rel="icon" href="icon.svg?v=13" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css?v=13">
 </head>
 <body>
-  <main class="app">
-    <section class="country-row" aria-label="Выбор страны">
-      <select id="countrySelect" aria-label="Страна собеседника"></select>
-    </section>
-
-    <section class="talk-card">
-      <div class="card-head">
-        <strong>Вы</strong>
-        <span id="youDirection">Русский → English</span>
+  <main class="phone-shell">
+    <header class="hero">
+      <div class="app-title">
+        <div class="app-mark" aria-hidden="true">↔</div>
+        <h1>Переводчик</h1>
       </div>
-      <div class="input-box">
-        <textarea id="youText" rows="3" placeholder="Скажите или напишите по-русски"></textarea>
-        <div class="input-actions">
-          <button id="youMic" class="icon-btn mic" type="button" aria-label="Говорить по-русски" title="Говорить">🎤</button>
-          <button id="youSend" class="icon-btn send" type="button" aria-label="Перевести" title="Перевести">➜</button>
+
+      <div class="country-picker">
+        <span class="country-icon" aria-hidden="true">🌍</span>
+        <select id="countrySelect" aria-label="Выбрать страну собеседника"></select>
+        <span class="country-chevron" aria-hidden="true">⌄</span>
+      </div>
+    </header>
+
+    <section class="conversation-sheet">
+      <div class="sheet-handle" aria-hidden="true"></div>
+
+      <section class="talk-section">
+        <div class="speaker-row">
+          <span class="speaker-badge">Я</span>
+          <div class="speaker-copy">
+            <strong>Вы</strong>
+            <span id="youDirection">Русский → English</span>
+          </div>
         </div>
-      </div>
-      <div id="youResult" class="result" hidden>
-        <div id="foreignText" class="result-text"></div>
-        <button id="speakForeign" class="sound-btn" type="button" aria-label="Озвучить перевод">🔊</button>
-      </div>
-    </section>
 
-    <div class="swap-mark" aria-hidden="true">↕</div>
-
-    <section class="talk-card partner-card">
-      <div class="card-head">
-        <strong>Собеседник</strong>
-        <span id="partnerDirection">English → Русский</span>
-      </div>
-      <div class="input-box">
-        <textarea id="partnerText" rows="3" placeholder="Say or type in English"></textarea>
-        <div class="input-actions">
-          <button id="partnerMic" class="icon-btn mic" type="button" aria-label="Говорить на языке собеседника" title="Говорить">🎤</button>
-          <button id="partnerSend" class="icon-btn send" type="button" aria-label="Перевести на русский" title="Перевести">➜</button>
+        <div class="composer">
+          <textarea id="youText" rows="3" enterkeyhint="send" autocomplete="off" autocapitalize="sentences" placeholder="Скажите или напишите по-русски"></textarea>
+          <div class="composer-actions">
+            <button id="youMic" class="round-btn mic-btn" type="button" aria-label="Говорить по-русски">🎤</button>
+            <button id="youSend" class="round-btn send-btn" type="button" aria-label="Перевести">➜</button>
+          </div>
         </div>
-      </div>
-      <div id="partnerResult" class="result" hidden>
-        <div id="russianText" class="result-text"></div>
-        <button id="speakRussian" class="sound-btn" type="button" aria-label="Озвучить по-русски">🔊</button>
-      </div>
+
+        <div id="youResult" class="translation-bubble" aria-live="polite" hidden>
+          <div id="foreignText" class="result-text"></div>
+          <button id="speakForeign" class="sound-btn" type="button" aria-label="Озвучить перевод">🔊</button>
+        </div>
+      </section>
+
+      <div class="conversation-divider" aria-hidden="true"><span>↕</span></div>
+
+      <section class="talk-section partner-section">
+        <div class="speaker-row">
+          <span class="speaker-badge partner-badge">С</span>
+          <div class="speaker-copy">
+            <strong>Собеседник</strong>
+            <span id="partnerDirection">English → Русский</span>
+          </div>
+        </div>
+
+        <div class="composer">
+          <textarea id="partnerText" rows="3" enterkeyhint="send" autocomplete="off" autocapitalize="sentences" placeholder="Say or type in English"></textarea>
+          <div class="composer-actions">
+            <button id="partnerMic" class="round-btn mic-btn" type="button" aria-label="Говорить на языке собеседника">🎤</button>
+            <button id="partnerSend" class="round-btn send-btn" type="button" aria-label="Перевести на русский">➜</button>
+          </div>
+        </div>
+
+        <div id="partnerResult" class="translation-bubble partner-result" aria-live="polite" hidden>
+          <div id="russianText" class="result-text"></div>
+          <button id="speakRussian" class="sound-btn" type="button" aria-label="Озвучить по-русски">🔊</button>
+        </div>
+      </section>
     </section>
 
-    <div id="toast" class="toast" hidden></div>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   </main>
 
-  <script src="app.js?v=12" defer></script>
+  <script src="app.js?v=13" defer></script>
 </body>
 </html>
