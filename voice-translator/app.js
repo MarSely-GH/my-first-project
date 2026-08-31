@@ -52,6 +52,23 @@ function showToast(message) {
   toastTimer = window.setTimeout(() => { els.toast.hidden = true; }, 2200);
 }
 
+function tapFeedback() {
+  try { navigator.vibrate?.(18); } catch {}
+}
+
+function fitTextarea(field) {
+  field.style.height = 'auto';
+  const next = Math.min(Math.max(field.scrollHeight, 124), 230);
+  field.style.height = `${next}px`;
+}
+
+function revealResult(element) {
+  element.hidden = false;
+  window.requestAnimationFrame(() => {
+    element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+}
+
 function renderCountries() {
   els.country.innerHTML = '';
   countries.forEach((item) => {
@@ -72,9 +89,13 @@ function updateCountryUI() {
   els.youDirection.textContent = `Русский → ${item.language}`;
   els.partnerDirection.textContent = `${item.language} → Русский`;
   els.partnerText.placeholder = `${item.language}: сказать или написать`;
+  els.partnerText.dir = item.target === 'ar' ? 'rtl' : 'auto';
+  els.foreignText.dir = item.target === 'ar' ? 'rtl' : 'auto';
+  els.russianText.dir = 'auto';
   els.youResult.hidden = true;
   els.partnerResult.hidden = true;
   els.partnerText.value = '';
+  fitTextarea(els.partnerText);
   try { localStorage.setItem('travelTranslatorCountry', item.id); } catch {}
 }
 
@@ -135,21 +156,22 @@ async function translate(text, source, target) {
 
 function setBusy(button, busy) {
   button.disabled = busy;
-  if (busy) button.textContent = '…';
-  else button.textContent = '➜';
+  button.textContent = busy ? '…' : '➜';
 }
 
 async function translateYou() {
   const item = currentCountry();
   const text = punctuateRussian(els.youText.value);
   if (!text) return;
+  tapFeedback();
   els.youText.value = text;
+  fitTextarea(els.youText);
   els.youResult.hidden = true;
   setBusy(els.youSend, true);
   try {
     const result = await translate(text, 'ru', item.target);
     els.foreignText.textContent = result;
-    els.youResult.hidden = false;
+    revealResult(els.youResult);
   } catch {
     showToast('Не удалось перевести');
   } finally {
@@ -161,13 +183,14 @@ async function translatePartner() {
   const item = currentCountry();
   const text = normalize(els.partnerText.value);
   if (!text) return;
+  tapFeedback();
   els.partnerResult.hidden = true;
   setBusy(els.partnerSend, true);
   try {
     let result = await translate(text, item.target, 'ru');
     result = punctuateRussian(result);
     els.russianText.textContent = result;
-    els.partnerResult.hidden = false;
+    revealResult(els.partnerResult);
   } catch {
     showToast('Не удалось перевести');
   } finally {
@@ -195,7 +218,7 @@ function stopOtherRecognition() {
 function listen(role) {
   const SpeechRecognition = speechRecognitionClass();
   if (!SpeechRecognition) {
-    showToast('Голосовой ввод недоступен');
+    showToast('Голосовой ввод недоступен в этом браузере');
     return;
   }
 
@@ -206,6 +229,7 @@ function listen(role) {
 
   stopOtherRecognition();
   window.speechSynthesis?.cancel();
+  tapFeedback();
 
   const item = currentCountry();
   const field = role === 'you' ? els.youText : els.partnerText;
@@ -217,6 +241,7 @@ function listen(role) {
   recognition.maxAlternatives = 1;
 
   field.value = '';
+  fitTextarea(field);
   if (role === 'you') els.youResult.hidden = true;
   else els.partnerResult.hidden = true;
 
@@ -238,6 +263,7 @@ function listen(role) {
       else interim = normalize(`${interim} ${piece}`);
     }
     field.value = normalize(`${finalText} ${interim}`);
+    fitTextarea(field);
   };
 
   recognition.onerror = (event) => {
@@ -265,6 +291,7 @@ function listen(role) {
 function speak(text, locale) {
   const value = normalize(text);
   if (!value || !('speechSynthesis' in window)) return;
+  tapFeedback();
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(value);
   utterance.lang = locale;
@@ -278,8 +305,18 @@ function speak(text, locale) {
   window.speechSynthesis.speak(utterance);
 }
 
+function bindKeyboardSend(field, handler) {
+  field.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' || event.shiftKey) return;
+    event.preventDefault();
+    field.blur();
+    handler();
+  });
+}
+
 els.country.addEventListener('change', () => {
   stopOtherRecognition();
+  tapFeedback();
   updateCountryUI();
 });
 els.youMic.addEventListener('click', () => listen('you'));
@@ -288,9 +325,15 @@ els.youSend.addEventListener('click', translateYou);
 els.partnerSend.addEventListener('click', translatePartner);
 els.speakForeign.addEventListener('click', () => speak(els.foreignText.textContent, currentCountry().id));
 els.speakRussian.addEventListener('click', () => speak(els.russianText.textContent, 'ru-RU'));
+els.youText.addEventListener('input', () => fitTextarea(els.youText));
+els.partnerText.addEventListener('input', () => fitTextarea(els.partnerText));
+bindKeyboardSend(els.youText, translateYou);
+bindKeyboardSend(els.partnerText, translatePartner);
 
 renderCountries();
+fitTextarea(els.youText);
+fitTextarea(els.partnerText);
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=12').catch(() => {}));
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=13').catch(() => {}));
 }
