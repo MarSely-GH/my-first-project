@@ -1,13 +1,13 @@
 {
-  "name": "Голосовой переводчик",
+  "name": "Переводчик",
   "short_name": "Переводчик",
-  "description": "Голосовой перевод с русского на разные языки с озвучкой.",
+  "description": "Минималистичный двусторонний голосовой переводчик для поездок.",
   "lang": "ru",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#eef3ff",
-  "theme_color": "#2457d6",
+  "background_color": "#f4f6fa",
+  "theme_color": "#f4f6fa",
   "icons": [
     {
       "src": "icon.svg",
