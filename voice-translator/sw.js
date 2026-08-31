@@ -1,5 +1,5 @@
-const CACHE_NAME = 'voice-translator-v11';
-const APP_SHELL = ['./', './index.html', './styles.css', './app.js', './voice-gender.js', './language-ui.js', './android-speech-fix.js', './egypt-language.js', './reverse-conversation.js', './manifest.webmanifest', './icon.svg'];
+const CACHE_NAME = 'voice-translator-v12';
+const APP_SHELL = ['./', './index.html', './styles.css', './app.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
@@ -8,7 +8,9 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))))
+    caches.keys().then((keys) => Promise.all(
+      keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+    ))
   );
   self.clients.claim();
 });
@@ -24,10 +26,8 @@ self.addEventListener('fetch', (event) => {
       const cache = await caches.open(CACHE_NAME);
       cache.put(event.request, fresh.clone());
       return fresh;
-    } catch (error) {
-      const cached = await caches.match(event.request, { ignoreSearch: true });
-      if (cached) return cached;
-      throw error;
+    } catch {
+      return caches.match(event.request, { ignoreSearch: true });
     }
   })());
 });
