@@ -1,455 +1,296 @@
-const languages = [
-  { id: 'de-DE', target: 'de', locale: 'de-DE', flag: '🇩🇪', country: 'Германия', language: 'Deutsch', selected: true },
-  { id: 'de-AT', target: 'de', locale: 'de-AT', flag: '🇦🇹', country: 'Австрия', language: 'Deutsch' },
-  { id: 'de-CH', target: 'de', locale: 'de-CH', flag: '🇨🇭', country: 'Швейцария', language: 'Deutsch' },
-  { id: 'en-GB', target: 'en', locale: 'en-GB', flag: '🇬🇧', country: 'Великобритания', language: 'English', selected: true },
-  { id: 'en-US', target: 'en', locale: 'en-US', flag: '🇺🇸', country: 'США', language: 'English', selected: true },
-  { id: 'fr-FR', target: 'fr', locale: 'fr-FR', flag: '🇫🇷', country: 'Франция', language: 'Français' },
-  { id: 'es-ES', target: 'es', locale: 'es-ES', flag: '🇪🇸', country: 'Испания', language: 'Español' },
-  { id: 'es-MX', target: 'es', locale: 'es-MX', flag: '🇲🇽', country: 'Мексика', language: 'Español' },
-  { id: 'it-IT', target: 'it', locale: 'it-IT', flag: '🇮🇹', country: 'Италия', language: 'Italiano' },
-  { id: 'nl-NL', target: 'nl', locale: 'nl-NL', flag: '🇳🇱', country: 'Нидерланды', language: 'Nederlands' },
-  { id: 'pl-PL', target: 'pl', locale: 'pl-PL', flag: '🇵🇱', country: 'Польша', language: 'Polski' },
-  { id: 'tr-TR', target: 'tr', locale: 'tr-TR', flag: '🇹🇷', country: 'Турция', language: 'Türkçe' },
-  { id: 'uk-UA', target: 'uk', locale: 'uk-UA', flag: '🇺🇦', country: 'Украина', language: 'Українська' },
-  { id: 'cs-CZ', target: 'cs', locale: 'cs-CZ', flag: '🇨🇿', country: 'Чехия', language: 'Čeština' },
-  { id: 'ro-RO', target: 'ro', locale: 'ro-RO', flag: '🇷🇴', country: 'Румыния', language: 'Română' },
-  { id: 'pt-PT', target: 'pt', locale: 'pt-PT', flag: '🇵🇹', country: 'Португалия', language: 'Português' },
-  { id: 'pt-BR', target: 'pt', locale: 'pt-BR', flag: '🇧🇷', country: 'Бразилия', language: 'Português' }
+const countries = [
+  { id: 'en-US', flag: '🇺🇸', country: 'США', language: 'English', target: 'en' },
+  { id: 'de-DE', flag: '🇩🇪', country: 'Германия', language: 'Deutsch', target: 'de' },
+  { id: 'ar-EG', flag: '🇪🇬', country: 'Египет', language: 'العربية', target: 'ar' },
+  { id: 'de-AT', flag: '🇦🇹', country: 'Австрия', language: 'Deutsch', target: 'de' },
+  { id: 'de-CH', flag: '🇨🇭', country: 'Швейцария', language: 'Deutsch', target: 'de' },
+  { id: 'en-GB', flag: '🇬🇧', country: 'Великобритания', language: 'English', target: 'en' },
+  { id: 'fr-FR', flag: '🇫🇷', country: 'Франция', language: 'Français', target: 'fr' },
+  { id: 'es-ES', flag: '🇪🇸', country: 'Испания', language: 'Español', target: 'es' },
+  { id: 'es-MX', flag: '🇲🇽', country: 'Мексика', language: 'Español', target: 'es' },
+  { id: 'it-IT', flag: '🇮🇹', country: 'Италия', language: 'Italiano', target: 'it' },
+  { id: 'nl-NL', flag: '🇳🇱', country: 'Нидерланды', language: 'Nederlands', target: 'nl' },
+  { id: 'pl-PL', flag: '🇵🇱', country: 'Польша', language: 'Polski', target: 'pl' },
+  { id: 'tr-TR', flag: '🇹🇷', country: 'Турция', language: 'Türkçe', target: 'tr' },
+  { id: 'uk-UA', flag: '🇺🇦', country: 'Украина', language: 'Українська', target: 'uk' },
+  { id: 'cs-CZ', flag: '🇨🇿', country: 'Чехия', language: 'Čeština', target: 'cs' },
+  { id: 'ro-RO', flag: '🇷🇴', country: 'Румыния', language: 'Română', target: 'ro' },
+  { id: 'pt-PT', flag: '🇵🇹', country: 'Португалия', language: 'Português', target: 'pt' },
+  { id: 'pt-BR', flag: '🇧🇷', country: 'Бразилия', language: 'Português', target: 'pt' }
 ];
 
 const els = {
-  languageGrid: document.querySelector('#languageGrid'),
-  sourceText: document.querySelector('#sourceText'),
-  micBtn: document.querySelector('#micBtn'),
-  stopBtn: document.querySelector('#stopBtn'),
-  translateBtn: document.querySelector('#translateBtn'),
-  clearBtn: document.querySelector('#clearBtn'),
-  autoTranslate: document.querySelector('#autoTranslate'),
-  results: document.querySelector('#results'),
-  status: document.querySelector('#status'),
-  resultTemplate: document.querySelector('#resultTemplate'),
-  speechRate: document.querySelector('#speechRate'),
-  stopSpeechBtn: document.querySelector('#stopSpeechBtn'),
-  defaultsBtn: document.querySelector('#defaultsBtn'),
-  speechHint: document.querySelector('#speechHint'),
-  installBtn: document.querySelector('#installBtn')
+  country: document.querySelector('#countrySelect'),
+  youDirection: document.querySelector('#youDirection'),
+  partnerDirection: document.querySelector('#partnerDirection'),
+  youText: document.querySelector('#youText'),
+  partnerText: document.querySelector('#partnerText'),
+  youMic: document.querySelector('#youMic'),
+  partnerMic: document.querySelector('#partnerMic'),
+  youSend: document.querySelector('#youSend'),
+  partnerSend: document.querySelector('#partnerSend'),
+  youResult: document.querySelector('#youResult'),
+  partnerResult: document.querySelector('#partnerResult'),
+  foreignText: document.querySelector('#foreignText'),
+  russianText: document.querySelector('#russianText'),
+  speakForeign: document.querySelector('#speakForeign'),
+  speakRussian: document.querySelector('#speakRussian'),
+  toast: document.querySelector('#toast')
 };
 
-let recognition = null;
-let recognitionRunning = false;
-let keepListening = false;
-let stopRequested = false;
-let restartTimer = null;
-let finalTranscript = '';
-let interimTranscript = '';
-let translationRun = 0;
-let voices = [];
-let deferredInstallPrompt = null;
+let toastTimer = null;
+let activeRecognition = null;
 
-function renderLanguages() {
-  els.languageGrid.innerHTML = '';
-  languages.forEach((lang) => {
-    const label = document.createElement('label');
-    label.className = 'lang-option';
-    label.innerHTML = `
-      <input type="checkbox" value="${lang.id}" ${lang.selected ? 'checked' : ''}>
-      <span class="flag">${lang.flag}</span>
-      <span class="lang-copy"><b>${lang.country}</b><small>${lang.language} · ${lang.locale}</small></span>
-    `;
-    els.languageGrid.append(label);
-  });
-}
-
-function setStatus(text, mode = '') {
-  els.status.textContent = text;
-  els.status.className = `status ${mode}`.trim();
-}
-
-function getSelectedLanguages() {
-  const selected = new Set([...els.languageGrid.querySelectorAll('input:checked')].map((input) => input.value));
-  return languages.filter((lang) => selected.has(lang.id));
-}
-
-function setDefaultLanguages() {
-  const defaults = new Set(['de-DE', 'en-GB', 'en-US']);
-  els.languageGrid.querySelectorAll('input').forEach((input) => {
-    input.checked = defaults.has(input.value);
-  });
-  showToast('Выбраны Германия, Великобритания и США');
+function currentCountry() {
+  return countries.find((item) => item.id === els.country.value) || countries[0];
 }
 
 function showToast(message) {
-  const old = document.querySelector('.toast');
-  if (old) old.remove();
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
-  document.body.append(toast);
-  window.setTimeout(() => toast.remove(), 2400);
+  window.clearTimeout(toastTimer);
+  els.toast.textContent = message;
+  els.toast.hidden = false;
+  toastTimer = window.setTimeout(() => { els.toast.hidden = true; }, 2200);
 }
 
-function normalizeSpaces(text) {
+function renderCountries() {
+  els.country.innerHTML = '';
+  countries.forEach((item) => {
+    const option = document.createElement('option');
+    option.value = item.id;
+    option.textContent = `${item.flag} ${item.country} · ${item.language}`;
+    els.country.append(option);
+  });
+
+  let saved = '';
+  try { saved = localStorage.getItem('travelTranslatorCountry') || ''; } catch {}
+  els.country.value = countries.some((item) => item.id === saved) ? saved : 'en-US';
+  updateCountryUI();
+}
+
+function updateCountryUI() {
+  const item = currentCountry();
+  els.youDirection.textContent = `Русский → ${item.language}`;
+  els.partnerDirection.textContent = `${item.language} → Русский`;
+  els.partnerText.placeholder = `${item.language}: сказать или написать`;
+  els.youResult.hidden = true;
+  els.partnerResult.hidden = true;
+  els.partnerText.value = '';
+  try { localStorage.setItem('travelTranslatorCountry', item.id); } catch {}
+}
+
+function normalize(text) {
   return String(text || '').replace(/\s+/g, ' ').trim();
 }
 
-function appendFinal(text) {
-  const clean = normalizeSpaces(text);
-  if (!clean) return;
-  finalTranscript = normalizeSpaces(`${finalTranscript} ${clean}`);
+function capitalizeRussian(text) {
+  const value = normalize(text);
+  if (!value) return '';
+  return value.charAt(0).toLocaleUpperCase('ru-RU') + value.slice(1);
 }
 
-function updateTranscriptBox() {
-  els.sourceText.value = normalizeSpaces(`${finalTranscript} ${interimTranscript}`);
-  els.sourceText.scrollTop = els.sourceText.scrollHeight;
+function looksLikeQuestion(text) {
+  const value = normalize(text).toLocaleLowerCase('ru-RU');
+  return /^(а\s+|ну\s+|и\s+)?(кто|что|где|куда|откуда|когда|почему|зачем|как|сколько|какой|какая|какое|какие)\b/u.test(value)
+    || /\b(можно|нужно|надо|есть|будет|можете|можешь)\s+ли\b/u.test(value)
+    || /^(подскажите|скажите|объясните|покажите).*\b(где|куда|когда|как|сколько|почему|можно)\b/u.test(value);
 }
 
-function splitForFallback(text, maxLength = 450) {
-  if (text.length <= maxLength) return [text];
-  const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
-  const chunks = [];
-  let current = '';
-  for (const sentence of sentences) {
-    if ((current + sentence).length > maxLength && current) {
-      chunks.push(current.trim());
-      current = sentence;
-    } else {
-      current += sentence;
-    }
-  }
-  if (current.trim()) chunks.push(current.trim());
-  return chunks;
+function punctuateRussian(text) {
+  let value = normalize(text)
+    .replace(/\bподскажите пожалуйста\b/giu, 'подскажите, пожалуйста,')
+    .replace(/\bскажите пожалуйста\b/giu, 'скажите, пожалуйста,');
+  if (!value) return '';
+  value = capitalizeRussian(value);
+  if (!/[.!?…]$/.test(value)) value += looksLikeQuestion(value) ? '?' : '.';
+  return value;
 }
 
-async function translateWithGoogle(text, target) {
-  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(text)}`;
+async function googleTranslate(text, source, target) {
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${encodeURIComponent(source)}&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(text)}`;
   const response = await fetch(url, { cache: 'no-store' });
-  if (!response.ok) throw new Error(`Google Translate: ${response.status}`);
+  if (!response.ok) throw new Error('translate');
   const data = await response.json();
-  const translated = Array.isArray(data?.[0]) ? data[0].map((part) => part?.[0] || '').join('') : '';
-  if (!translated) throw new Error('Пустой ответ перевода');
-  return translated;
+  const result = Array.isArray(data?.[0]) ? data[0].map((part) => part?.[0] || '').join('') : '';
+  if (!result) throw new Error('empty');
+  return result;
 }
 
-async function translateWithMyMemory(text, target) {
-  const chunks = splitForFallback(text);
-  const translatedChunks = [];
-  for (const chunk of chunks) {
-    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=ru|${encodeURIComponent(target)}`;
-    const response = await fetch(url, { cache: 'no-store' });
-    if (!response.ok) throw new Error(`MyMemory: ${response.status}`);
-    const data = await response.json();
-    const translated = data?.responseData?.translatedText;
-    if (!translated) throw new Error('Пустой ответ резервного переводчика');
-    translatedChunks.push(translated);
-  }
-  return translatedChunks.join(' ');
+async function fallbackTranslate(text, source, target) {
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${encodeURIComponent(source)}|${encodeURIComponent(target)}`;
+  const response = await fetch(url, { cache: 'no-store' });
+  if (!response.ok) throw new Error('translate');
+  const data = await response.json();
+  const result = data?.responseData?.translatedText || '';
+  if (!result) throw new Error('empty');
+  return result;
 }
 
-async function translateText(text, target) {
+async function translate(text, source, target) {
   try {
-    return await translateWithGoogle(text, target);
-  } catch (googleError) {
-    console.warn('Основной переводчик недоступен, пробуем резервный.', googleError);
-    return translateWithMyMemory(text, target);
+    return await googleTranslate(text, source, target);
+  } catch {
+    return fallbackTranslate(text, source, target);
   }
 }
 
-function findVoice(locale) {
-  const normalized = locale.toLowerCase();
-  return voices.find((voice) => voice.lang.toLowerCase() === normalized)
-    || voices.find((voice) => voice.lang.toLowerCase().startsWith(normalized.split('-')[0]))
-    || null;
+function setBusy(button, busy) {
+  button.disabled = busy;
+  if (busy) button.textContent = '…';
+  else button.textContent = '➜';
 }
 
-function speak(text, locale) {
-  if (!('speechSynthesis' in window)) {
-    showToast('Озвучка не поддерживается этим браузером');
-    return;
-  }
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = locale;
-  utterance.rate = Number(els.speechRate.value) || 1;
-  const voice = findVoice(locale);
-  if (voice) utterance.voice = voice;
-  utterance.onerror = () => showToast('Не получилось воспроизвести голос');
-  window.speechSynthesis.speak(utterance);
-}
-
-function makeResultCard(lang, translatedText) {
-  const fragment = els.resultTemplate.content.cloneNode(true);
-  const card = fragment.querySelector('.result-card');
-  fragment.querySelector('.result-country').textContent = `${lang.flag} ${lang.country}`;
-  fragment.querySelector('.result-lang').textContent = `${lang.language} · ${lang.locale}`;
-  fragment.querySelector('.translated-text').textContent = translatedText;
-
-  const voice = findVoice(lang.locale);
-  fragment.querySelector('.voice-note').textContent = voice
-    ? `Голос: ${voice.name}`
-    : `Будет использован доступный системный голос для ${lang.locale}`;
-
-  fragment.querySelector('.speak-btn').addEventListener('click', () => speak(translatedText, lang.locale));
-  fragment.querySelector('.copy-btn').addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(translatedText);
-      showToast('Перевод скопирован');
-    } catch {
-      showToast('Не удалось скопировать автоматически');
-    }
-  });
-  card.dataset.locale = lang.locale;
-  return fragment;
-}
-
-function makeErrorCard(lang, message) {
-  const wrapper = document.createElement('article');
-  wrapper.className = 'result-card';
-  wrapper.innerHTML = `
-    <div class="result-country">${lang.flag} ${lang.country}</div>
-    <div class="result-lang">${lang.language} · ${lang.locale}</div>
-    <div class="translated-text">Не удалось получить перевод.</div>
-    <div class="hint"></div>
-  `;
-  wrapper.querySelector('.hint').textContent = message;
-  return wrapper;
-}
-
-async function runTranslation() {
-  const text = els.sourceText.value.trim();
-  const selected = getSelectedLanguages();
-  if (!text) {
-    showToast('Сначала скажите или напишите фразу');
-    els.sourceText.focus();
-    return;
-  }
-  if (!selected.length) {
-    showToast('Выберите хотя бы одну страну');
-    return;
-  }
-
-  const runId = ++translationRun;
-  setStatus('Перевожу…', 'busy');
-  els.translateBtn.disabled = true;
-  els.results.className = 'results';
-  els.results.innerHTML = '';
-
+async function translateYou() {
+  const item = currentCountry();
+  const text = punctuateRussian(els.youText.value);
+  if (!text) return;
+  els.youText.value = text;
+  els.youResult.hidden = true;
+  setBusy(els.youSend, true);
   try {
-    const cache = new Map();
-    const getTranslation = (target) => {
-      if (!cache.has(target)) cache.set(target, translateText(text, target));
-      return cache.get(target);
-    };
-
-    const cards = await Promise.all(selected.map(async (lang) => {
-      try {
-        const translated = await getTranslation(lang.target);
-        return { lang, translated };
-      } catch (error) {
-        return { lang, error: error?.message || 'Ошибка сети' };
-      }
-    }));
-
-    if (runId !== translationRun) return;
-    cards.forEach((item) => {
-      if (item.error) els.results.append(makeErrorCard(item.lang, item.error));
-      else els.results.append(makeResultCard(item.lang, item.translated));
-    });
+    const result = await translate(text, 'ru', item.target);
+    els.foreignText.textContent = result;
+    els.youResult.hidden = false;
+  } catch {
+    showToast('Не удалось перевести');
   } finally {
-    if (runId === translationRun) {
-      els.translateBtn.disabled = false;
-      if (keepListening) setStatus('Слушаю — паузы можно делать', 'listening');
-      else setStatus('Готов');
-    }
+    setBusy(els.youSend, false);
   }
 }
 
-function finalizeListeningSession() {
-  recognitionRunning = false;
-  if (interimTranscript) {
-    appendFinal(interimTranscript);
-    interimTranscript = '';
-    updateTranscriptBox();
-  }
-
-  if (keepListening) {
-    els.micBtn.disabled = true;
-    els.stopBtn.disabled = false;
-    setStatus('Слушаю — паузы можно делать', 'listening');
-    clearTimeout(restartTimer);
-    restartTimer = window.setTimeout(startRecognitionCycle, 280);
-    return;
-  }
-
-  els.micBtn.disabled = false;
-  els.stopBtn.disabled = true;
-  if (!els.status.classList.contains('busy')) setStatus('Готов');
-
-  const shouldTranslate = stopRequested && els.autoTranslate.checked && els.sourceText.value.trim();
-  stopRequested = false;
-  if (shouldTranslate) runTranslation();
-}
-
-function startRecognitionCycle() {
-  if (!recognition || !keepListening || recognitionRunning) return;
+async function translatePartner() {
+  const item = currentCountry();
+  const text = normalize(els.partnerText.value);
+  if (!text) return;
+  els.partnerResult.hidden = true;
+  setBusy(els.partnerSend, true);
   try {
-    recognition.start();
-  } catch (error) {
-    if (error?.name === 'InvalidStateError') {
-      clearTimeout(restartTimer);
-      restartTimer = window.setTimeout(startRecognitionCycle, 350);
-      return;
-    }
-    console.warn(error);
-    keepListening = false;
-    showToast('Не удалось снова запустить микрофон');
-    finalizeListeningSession();
+    let result = await translate(text, item.target, 'ru');
+    result = punctuateRussian(result);
+    els.russianText.textContent = result;
+    els.partnerResult.hidden = false;
+  } catch {
+    showToast('Не удалось перевести');
+  } finally {
+    setBusy(els.partnerSend, false);
   }
 }
 
-function initSpeechRecognition() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+function speechRecognitionClass() {
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+}
+
+function resetMicButton(button) {
+  button.classList.remove('listening');
+  button.textContent = '🎤';
+}
+
+function stopOtherRecognition() {
+  if (!activeRecognition) return;
+  activeRecognition.suppress = true;
+  try { activeRecognition.recognition.abort(); } catch {}
+  resetMicButton(activeRecognition.button);
+  activeRecognition = null;
+}
+
+function listen(role) {
+  const SpeechRecognition = speechRecognitionClass();
   if (!SpeechRecognition) {
-    els.micBtn.disabled = true;
-    els.speechHint.textContent = 'В этом браузере голосовое распознавание недоступно. Используйте ввод текста или откройте страницу в Chrome/совместимом браузере.';
+    showToast('Голосовой ввод недоступен');
     return;
   }
 
-  recognition = new SpeechRecognition();
-  recognition.lang = 'ru-RU';
+  if (activeRecognition?.role === role) {
+    try { activeRecognition.recognition.stop(); } catch {}
+    return;
+  }
+
+  stopOtherRecognition();
+  window.speechSynthesis?.cancel();
+
+  const item = currentCountry();
+  const field = role === 'you' ? els.youText : els.partnerText;
+  const button = role === 'you' ? els.youMic : els.partnerMic;
+  const recognition = new SpeechRecognition();
+  recognition.lang = role === 'you' ? 'ru-RU' : item.id;
   recognition.interimResults = true;
-  recognition.continuous = true;
+  recognition.continuous = false;
   recognition.maxAlternatives = 1;
 
+  field.value = '';
+  if (role === 'you') els.youResult.hidden = true;
+  else els.partnerResult.hidden = true;
+
+  const state = { role, recognition, button, suppress: false };
+  activeRecognition = state;
+  let finalText = '';
+
   recognition.onstart = () => {
-    recognitionRunning = true;
-    els.micBtn.disabled = true;
-    els.stopBtn.disabled = false;
-    setStatus('Слушаю — паузы можно делать', 'listening');
+    button.classList.add('listening');
+    button.textContent = '■';
   };
 
   recognition.onresult = (event) => {
-    let currentInterim = '';
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const text = normalizeSpaces(event.results[i][0]?.transcript || '');
-      if (!text) continue;
-      if (event.results[i].isFinal) appendFinal(text);
-      else currentInterim = normalizeSpaces(`${currentInterim} ${text}`);
+    let interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i += 1) {
+      const piece = normalize(event.results[i][0]?.transcript || '');
+      if (!piece) continue;
+      if (event.results[i].isFinal) finalText = normalize(`${finalText} ${piece}`);
+      else interim = normalize(`${interim} ${piece}`);
     }
-    interimTranscript = currentInterim;
-    updateTranscriptBox();
+    field.value = normalize(`${finalText} ${interim}`);
   };
 
   recognition.onerror = (event) => {
-    const fatal = ['not-allowed', 'service-not-allowed', 'audio-capture', 'network'].includes(event.error);
-    const labels = {
-      'not-allowed': 'Нет разрешения на микрофон',
-      'service-not-allowed': 'Браузер запретил распознавание речи',
-      'audio-capture': 'Микрофон не найден',
-      'network': 'Ошибка сети при распознавании'
-    };
-
-    if (fatal) {
-      keepListening = false;
-      stopRequested = false;
-      showToast(labels[event.error] || `Ошибка микрофона: ${event.error}`);
-    } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
-      showToast(`Ошибка микрофона: ${event.error}`);
-    }
+    if (!['aborted', 'no-speech'].includes(event.error)) showToast('Не расслышал. Попробуйте ещё раз');
   };
 
-  recognition.onend = finalizeListeningSession;
-}
+  recognition.onend = () => {
+    resetMicButton(button);
+    if (activeRecognition === state) activeRecognition = null;
+    if (state.suppress) return;
+    if (!normalize(field.value)) return;
+    if (role === 'you') translateYou();
+    else translatePartner();
+  };
 
-function startListening() {
-  if (!recognition || keepListening || recognitionRunning) return;
-  window.speechSynthesis?.cancel();
-  translationRun++;
-  els.translateBtn.disabled = false;
-  finalTranscript = '';
-  interimTranscript = '';
-  els.sourceText.value = '';
-  keepListening = true;
-  stopRequested = false;
-  setStatus('Запускаю микрофон…', 'listening');
-  startRecognitionCycle();
-}
-
-function stopListening() {
-  if (!recognition || (!keepListening && !recognitionRunning)) return;
-  keepListening = false;
-  stopRequested = true;
-  clearTimeout(restartTimer);
-  setStatus('Завершаю диктовку…', 'busy');
-  if (recognitionRunning) {
-    try {
-      recognition.stop();
-    } catch {
-      finalizeListeningSession();
-    }
-  } else {
-    finalizeListeningSession();
+  try {
+    recognition.start();
+  } catch {
+    resetMicButton(button);
+    activeRecognition = null;
+    showToast('Не удалось включить микрофон');
   }
 }
 
-function initVoices() {
-  if (!('speechSynthesis' in window)) return;
-  const refresh = () => { voices = window.speechSynthesis.getVoices(); };
-  refresh();
-  window.speechSynthesis.addEventListener?.('voiceschanged', refresh);
+function speak(text, locale) {
+  const value = normalize(text);
+  if (!value || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(value);
+  utterance.lang = locale;
+  utterance.rate = 0.95;
+  const voices = window.speechSynthesis.getVoices();
+  const wanted = locale.toLocaleLowerCase();
+  const base = wanted.split('-')[0];
+  const voice = voices.find((item) => item.lang.toLocaleLowerCase() === wanted)
+    || voices.find((item) => item.lang.toLocaleLowerCase().startsWith(base));
+  if (voice) utterance.voice = voice;
+  window.speechSynthesis.speak(utterance);
 }
 
-function registerPwa() {
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=5').catch(console.warn));
-  }
-
-  window.addEventListener('beforeinstallprompt', (event) => {
-    event.preventDefault();
-    deferredInstallPrompt = event;
-    els.installBtn.hidden = false;
-  });
-
-  els.installBtn.addEventListener('click', async () => {
-    if (!deferredInstallPrompt) {
-      showToast('Откройте меню браузера → «Установить приложение» или «Создать ярлык»');
-      return;
-    }
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
-    els.installBtn.hidden = true;
-  });
-}
-
-els.micBtn.addEventListener('click', startListening);
-els.stopBtn.addEventListener('click', stopListening);
-els.translateBtn.addEventListener('click', runTranslation);
-els.clearBtn.addEventListener('click', () => {
-  translationRun++;
-  keepListening = false;
-  stopRequested = false;
-  clearTimeout(restartTimer);
-  if (recognitionRunning) {
-    try { recognition.abort(); } catch {}
-  }
-  finalTranscript = '';
-  interimTranscript = '';
-  els.sourceText.value = '';
-  els.translateBtn.disabled = false;
-  els.micBtn.disabled = false;
-  els.stopBtn.disabled = true;
-  els.results.className = 'results empty-state';
-  els.results.innerHTML = '<div class="empty-icon">🌍</div><p>Здесь появятся переводы. На каждой карточке будет кнопка ▶ «Озвучить» и список доступных голосов.</p>';
-  setStatus('Готов');
+els.country.addEventListener('change', () => {
+  stopOtherRecognition();
+  updateCountryUI();
 });
-els.stopSpeechBtn.addEventListener('click', () => window.speechSynthesis?.cancel());
-els.defaultsBtn.addEventListener('click', setDefaultLanguages);
-els.sourceText.addEventListener('keydown', (event) => {
-  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') runTranslation();
-});
+els.youMic.addEventListener('click', () => listen('you'));
+els.partnerMic.addEventListener('click', () => listen('partner'));
+els.youSend.addEventListener('click', translateYou);
+els.partnerSend.addEventListener('click', translatePartner);
+els.speakForeign.addEventListener('click', () => speak(els.foreignText.textContent, currentCountry().id));
+els.speakRussian.addEventListener('click', () => speak(els.russianText.textContent, 'ru-RU'));
 
-renderLanguages();
-initSpeechRecognition();
-initVoices();
-registerPwa();
+renderCountries();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=12').catch(() => {}));
+}
