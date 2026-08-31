@@ -1,16 +1,16 @@
 {
   "name": "Переводчик",
   "short_name": "Переводчик",
-  "description": "Минималистичный двусторонний голосовой переводчик для поездок.",
+  "description": "Двусторонний голосовой переводчик для общения в поездках.",
   "lang": "ru",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f4f6fa",
-  "theme_color": "#f4f6fa",
+  "background_color": "#087f83",
+  "theme_color": "#087f83",
   "icons": [
     {
-      "src": "icon.svg",
+      "src": "icon.svg?v=13",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
