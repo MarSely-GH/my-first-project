@@ -3,122 +3,63 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#2457d6">
-  <meta name="description" content="Голосовой переводчик с русского на немецкий, английский и другие языки с озвучкой.">
+  <meta name="theme-color" content="#f4f6fa">
+  <meta name="description" content="Минималистичный голосовой переводчик для разговора в поездках.">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Переводчик">
-  <title>Голосовой переводчик</title>
-  <link rel="manifest" href="manifest.webmanifest?v=11">
+  <title>Переводчик</title>
+  <link rel="manifest" href="manifest.webmanifest?v=12">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=11">
-  <style>
-    .voice-choice-box{margin-top:18px;padding:16px;border:2px solid #2457d6;border-radius:16px;background:#f5f8ff}
-    .voice-choice-box label{display:block;font-weight:800;font-size:1.05rem;margin-bottom:8px}
-    .voice-choice-box select,.card-voice-select{width:100%;min-height:48px;font-size:1rem;font-weight:700;padding:8px 12px;border-radius:10px}
-    .voice-choice-box .voice-explain{margin:8px 0 0;font-size:.92rem}
-    .version-badge{font-size:.78rem;opacity:.7;margin-top:6px}
-    .card-voice-box{margin-top:14px;padding:12px;border:1px solid #cbd7f7;border-radius:12px;background:#f8faff}
-    .card-voice-box label{display:block;font-weight:750;margin-bottom:7px}
-    .card-voice-box small{display:block;margin-top:7px;opacity:.78;line-height:1.35}
-    .listen-note{margin-top:10px;padding:10px 12px;border-radius:12px;background:#eef6ff;font-weight:700;line-height:1.4}
-  </style>
+  <link rel="stylesheet" href="styles.css?v=12">
 </head>
 <body>
-  <main class="app-shell">
-    <header class="hero">
-      <div>
-        <p class="eyebrow">РУССКИЙ ↔ МИР</p>
-        <h1>Голосовой переводчик</h1>
-        <p class="subtitle">Говорите по-русски иностранцу или дайте собеседнику сказать фразу на его языке и получите перевод на русский.</p>
-        <div class="version-badge">Версия 11 · разговор в обе стороны</div>
-      </div>
-      <button id="installBtn" class="ghost install" type="button" hidden>Установить ярлык</button>
-    </header>
-
-    <section class="panel source-panel">
-      <div class="panel-title-row">
-        <div><span class="step">1</span><h2>Вы → Собеседнику</h2></div>
-        <span id="status" class="status">Готов</span>
-      </div>
-      <p class="hint">Скажите или напишите фразу по-русски.</p>
-      <textarea id="sourceText" rows="5" placeholder="Например: Добрый день. Подскажите, пожалуйста, где находится ближайшая остановка?"></textarea>
-      <div class="actions primary-actions">
-        <button id="micBtn" class="primary" type="button">🎤 Говорить</button>
-        <button id="stopBtn" class="danger" type="button" disabled>■ Стоп</button>
-        <button id="translateBtn" class="secondary" type="button">Перевести</button>
-        <button id="clearBtn" class="ghost" type="button">Очистить</button>
-      </div>
-      <div class="listen-note">🎤 После нажатия «Говорить» можно делать паузы. Переводчик продолжит слушать и накапливать текст, пока вы сами не нажмёте «Стоп».</div>
-      <label class="check-row compact"><input id="autoTranslate" type="checkbox" checked><span>Перевести автоматически после нажатия «Стоп»</span></label>
-      <p id="speechHint" class="hint">Если браузер сам завершит распознавание из-за тишины, приложение автоматически запустит микрофон снова и продолжит эту же диктовку.</p>
+  <main class="app">
+    <section class="country-row" aria-label="Выбор страны">
+      <select id="countrySelect" aria-label="Страна собеседника"></select>
     </section>
 
-    <section class="panel">
-      <div class="panel-title-row">
-        <div><span class="step">2</span><h2>Выберите страны и языки перевода</h2></div>
-        <button id="defaultsBtn" class="ghost small-btn" type="button">🇩🇪 Германия + 🇺🇸 США</button>
+    <section class="talk-card">
+      <div class="card-head">
+        <strong>Вы</strong>
+        <span id="youDirection">Русский → English</span>
       </div>
-      <p class="hint">Германия и США всегда находятся сверху. Остальные языки открываются по стрелке «Другие языки» и при необходимости добавляются к переводу.</p>
-      <div id="languageGrid" class="language-grid"></div>
-
-      <div class="voice-choice-box">
-        <label for="voiceGender">🗣️ Автоматический выбор голоса</label>
-        <select id="voiceGender">
-          <option value="male" selected>👨 Мужской — предпочтительно</option>
-          <option value="auto">🔊 Авто — системный</option>
-          <option value="female">👩 Женский</option>
-        </select>
-        <p class="voice-explain">После перевода на каждой карточке появится список «Точный голос на этом устройстве». Там можно вручную выбрать любой голос, который реально предоставляет ваш браузер для нужного языка.</p>
+      <div class="input-box">
+        <textarea id="youText" rows="3" placeholder="Скажите или напишите по-русски"></textarea>
+        <div class="input-actions">
+          <button id="youMic" class="icon-btn mic" type="button" aria-label="Говорить по-русски" title="Говорить">🎤</button>
+          <button id="youSend" class="icon-btn send" type="button" aria-label="Перевести" title="Перевести">➜</button>
+        </div>
       </div>
-
-      <div class="voice-settings">
-        <label for="speechRate">Скорость озвучки</label>
-        <select id="speechRate">
-          <option value="0.8">Медленно</option>
-          <option value="0.95" selected>Спокойно</option>
-          <option value="1">Обычно</option>
-          <option value="1.1">Чуть быстрее</option>
-        </select>
+      <div id="youResult" class="result" hidden>
+        <div id="foreignText" class="result-text"></div>
+        <button id="speakForeign" class="sound-btn" type="button" aria-label="Озвучить перевод">🔊</button>
       </div>
     </section>
 
-    <section class="panel results-panel">
-      <div class="panel-title-row">
-        <div><span class="step">3</span><h2>Перевод и озвучка</h2></div>
-        <button id="stopSpeechBtn" class="ghost small-btn" type="button">Остановить голос</button>
+    <div class="swap-mark" aria-hidden="true">↕</div>
+
+    <section class="talk-card partner-card">
+      <div class="card-head">
+        <strong>Собеседник</strong>
+        <span id="partnerDirection">English → Русский</span>
       </div>
-      <div id="results" class="results empty-state"><div class="empty-icon">🌍</div><p>Здесь появятся переводы. На каждой карточке будет кнопка ▶ «Озвучить» и список доступных голосов.</p></div>
+      <div class="input-box">
+        <textarea id="partnerText" rows="3" placeholder="Say or type in English"></textarea>
+        <div class="input-actions">
+          <button id="partnerMic" class="icon-btn mic" type="button" aria-label="Говорить на языке собеседника" title="Говорить">🎤</button>
+          <button id="partnerSend" class="icon-btn send" type="button" aria-label="Перевести на русский" title="Перевести">➜</button>
+        </div>
+      </div>
+      <div id="partnerResult" class="result" hidden>
+        <div id="russianText" class="result-text"></div>
+        <button id="speakRussian" class="sound-btn" type="button" aria-label="Озвучить по-русски">🔊</button>
+      </div>
     </section>
 
-    <section class="panel info-panel">
-      <details><summary>Как пользоваться и что важно знать</summary><div class="details-body">
-        <p><b>Вы → иностранцу:</b> нажмите «Говорить», скажите фразу по-русски, нажмите «Стоп» и включите озвучку перевода.</p>
-        <p><b>Иностранец → вам:</b> в блоке «Собеседник → Русский» выберите его язык, дайте ему нажать микрофон и сказать фразу. Перевод на русский появится автоматически.</p>
-        <p>Для распознавания речи и перевода нужен интернет. Перевод выполняется через внешний онлайн-сервис. Не вводите пароли, банковские данные и другую секретную информацию.</p>
-      </div></details>
-    </section>
+    <div id="toast" class="toast" hidden></div>
   </main>
 
-  <template id="resultTemplate">
-    <article class="result-card">
-      <div class="result-head"><div><div class="result-country"></div><div class="result-lang"></div></div><button class="copy-btn ghost small-btn" type="button">Копировать</button></div>
-      <div class="translated-text"></div>
-      <div class="card-voice-box">
-        <label>🎙️ Точный голос на этом устройстве</label>
-        <select class="card-voice-select" aria-label="Выбрать точный голос"></select>
-        <small class="available-voices-note">Загружаю список системных голосов…</small>
-      </div>
-      <div class="result-actions"><button class="speak-btn primary" type="button">▶ Озвучить</button></div>
-      <div class="voice-note hint"></div>
-    </article>
-  </template>
-
-  <script src="app.js?v=11" defer></script>
-  <script src="voice-gender.js?v=11" defer></script>
-  <script src="language-ui.js?v=11" defer></script>
-  <script src="android-speech-fix.js?v=11" defer></script>
-  <script src="egypt-language.js?v=11" defer></script>
-  <script src="reverse-conversation.js?v=11" defer></script>
+  <script src="app.js?v=12" defer></script>
 </body>
 </html>
