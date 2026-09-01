@@ -10,9 +10,28 @@
   <meta name="apple-mobile-web-app-title" content="Переводчик">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Переводчик</title>
-  <link rel="manifest" href="manifest.webmanifest?v=14">
-  <link rel="icon" href="icon.svg?v=14" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=14">
+  <link rel="manifest" href="manifest.webmanifest?v=15">
+  <link rel="icon" href="icon.svg?v=15" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css?v=15">
+  <style>
+    .copy-mini{
+      border:0;display:grid;place-items:center;width:42px;height:42px;border-radius:14px;
+      background:#eef7f5;color:#087f83;font-size:22px;font-weight:800;line-height:1;
+      cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+      transition:transform .08s ease,background .15s ease,color .15s ease
+    }
+    .copy-mini:active{transform:scale(.95)}
+    .copy-mini.copied{background:#087f83;color:#fff}
+    .composer-copy{position:absolute;z-index:4;top:11px;right:11px;box-shadow:0 2px 8px rgba(8,127,131,.06)}
+    .composer textarea{padding-right:66px}
+    .bubble-buttons{flex:0 0 auto;display:flex;flex-direction:column;gap:7px}
+    .bubble-buttons .sound-btn,.bubble-buttons .copy-mini{width:44px;height:44px;border-radius:14px}
+    @media(max-width:360px){
+      .copy-mini{width:40px;height:40px;border-radius:13px}
+      .composer textarea{padding-right:62px}
+      .bubble-buttons .sound-btn,.bubble-buttons .copy-mini{width:42px;height:42px}
+    }
+  </style>
 </head>
 <body>
   <main class="phone-shell">
@@ -43,6 +62,7 @@
 
         <div class="composer">
           <textarea id="youText" rows="3" enterkeyhint="send" autocomplete="off" autocapitalize="sentences" placeholder="Скажите или напишите по-русски"></textarea>
+          <button id="copyYouText" class="copy-mini composer-copy" type="button" aria-label="Скопировать ваш текст">⧉</button>
           <div class="composer-actions">
             <button id="youMic" class="round-btn mic-btn" type="button" aria-label="Говорить по-русски">🎤</button>
             <button id="youSend" class="round-btn send-btn" type="button" aria-label="Перевести">➜</button>
@@ -51,7 +71,10 @@
 
         <div id="youResult" class="translation-bubble" aria-live="polite" hidden>
           <div id="foreignText" class="result-text"></div>
-          <button id="speakForeign" class="sound-btn" type="button" aria-label="Озвучить перевод">🔊</button>
+          <div class="bubble-buttons">
+            <button id="speakForeign" class="sound-btn" type="button" aria-label="Озвучить перевод">🔊</button>
+            <button id="copyForeignText" class="copy-mini" type="button" aria-label="Скопировать перевод">⧉</button>
+          </div>
         </div>
       </section>
 
@@ -68,6 +91,7 @@
 
         <div class="composer">
           <textarea id="partnerText" rows="3" enterkeyhint="send" autocomplete="off" autocapitalize="sentences" placeholder="Say or type in English"></textarea>
+          <button id="copyPartnerText" class="copy-mini composer-copy" type="button" aria-label="Скопировать текст собеседника">⧉</button>
           <div class="composer-actions">
             <button id="partnerMic" class="round-btn mic-btn" type="button" aria-label="Говорить на языке собеседника">🎤</button>
             <button id="partnerSend" class="round-btn send-btn" type="button" aria-label="Перевести на русский">➜</button>
@@ -76,7 +100,10 @@
 
         <div id="partnerResult" class="translation-bubble partner-result" aria-live="polite" hidden>
           <div id="russianText" class="result-text"></div>
-          <button id="speakRussian" class="sound-btn" type="button" aria-label="Озвучить по-русски">🔊</button>
+          <div class="bubble-buttons">
+            <button id="speakRussian" class="sound-btn" type="button" aria-label="Озвучить по-русски">🔊</button>
+            <button id="copyRussianText" class="copy-mini" type="button" aria-label="Скопировать перевод на русский">⧉</button>
+          </div>
         </div>
       </section>
     </section>
@@ -84,7 +111,46 @@
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   </main>
 
-  <script src="app.js?v=14" defer></script>
-  <script src="copy-controls.js?v=14" defer></script>
+  <script src="app.js?v=15" defer></script>
+  <script>
+    (() => {
+      function message(text){
+        const toast=document.querySelector('#toast');
+        if(!toast)return;
+        toast.textContent=text;toast.hidden=false;
+        clearTimeout(window.__copyToastTimer);
+        window.__copyToastTimer=setTimeout(()=>{toast.hidden=true},1400);
+      }
+
+      async function copy(value,button){
+        const text=String(value||'').trim();
+        if(!text){message('Здесь пока нет текста');return}
+        try{
+          if(navigator.clipboard&&window.isSecureContext){
+            await navigator.clipboard.writeText(text);
+          }else{
+            const helper=document.createElement('textarea');
+            helper.value=text;helper.setAttribute('readonly','');
+            helper.style.position='fixed';helper.style.opacity='0';helper.style.pointerEvents='none';
+            document.body.append(helper);helper.select();helper.setSelectionRange(0,helper.value.length);
+            const ok=document.execCommand('copy');helper.remove();if(!ok)throw new Error('copy');
+          }
+          try{navigator.vibrate?.(14)}catch{}
+          button.textContent='✓';button.classList.add('copied');message('Скопировано');
+          setTimeout(()=>{button.textContent='⧉';button.classList.remove('copied')},900);
+        }catch{message('Не удалось скопировать')}
+      }
+
+      const bind=(buttonId,getValue)=>{
+        const button=document.getElementById(buttonId);
+        if(button)button.addEventListener('click',()=>copy(getValue(),button));
+      };
+
+      bind('copyYouText',()=>document.getElementById('youText')?.value);
+      bind('copyForeignText',()=>document.getElementById('foreignText')?.textContent);
+      bind('copyPartnerText',()=>document.getElementById('partnerText')?.value);
+      bind('copyRussianText',()=>document.getElementById('russianText')?.textContent);
+    })();
+  </script>
 </body>
 </html>
